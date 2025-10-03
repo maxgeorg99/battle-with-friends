@@ -76,6 +76,10 @@ function AppWithSpacetime() {
 
       // Register player immediately after connection is established
       console.log('Registering player with username:', username);
+      conn.subscriptionBuilder()
+          .subscribe([
+            "SELECT * FROM player",
+          ]);
       conn.reducers.registerPlayer(username);
     })
     .onConnectError((error) => {
