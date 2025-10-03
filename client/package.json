@@ -10,6 +10,7 @@
     },
     "dependencies": {
       "react-oidc-context": "latest",
+      "oidc-client-ts": "latest",
       "spacetimedb": "latest",
       "phaser": "^3.80.1",
       "react": "^18.2.0",

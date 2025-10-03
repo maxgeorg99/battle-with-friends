@@ -103,11 +103,7 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-  <AuthProvider
-    configuration={oidcConfig}
-    onEvent={console.log}
-    onSigninCallback={onSigninCallback}
-  >
+    <AuthProvider {...oidcConfig} onSigninCallback={onSigninCallback}>
     <OidcDebug />
     <AppWithSpacetime />
   </AuthProvider>
