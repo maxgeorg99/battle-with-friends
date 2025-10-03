@@ -77,13 +77,7 @@ function AppWithSpacetime() {
       // Subscribe to all tables
       console.log('📡 Subscribing to SpacetimeDB tables...');
       conn.subscriptionBuilder()
-          .subscribe([
-            "SELECT * FROM player",
-            "SELECT * FROM crew",
-            "SELECT * FROM shop_crew",
-            "SELECT * FROM battle",
-          ]);
-
+          .subscribeToAllTables();
       // Register player immediately after connection is established
       console.log('Registering player with username:', username);
       conn.reducers.registerPlayer(username);
