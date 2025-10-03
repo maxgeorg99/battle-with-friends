@@ -9,7 +9,7 @@
       "preview": "vite preview"
     },
     "dependencies": {
-      "@axa-fr/react-oidc": "^7.22.0",
+      "react-oidc-context": "latest",
       "spacetimedb": "latest",
       "phaser": "^3.80.1",
       "react": "^18.2.0",

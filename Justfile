@@ -19,3 +19,6 @@ client:
 
 build:
     cd client && bun run build
+
+publish server:
+    spacetime publish -p ./server-rust -s maincloud {{module}} --delete-data
