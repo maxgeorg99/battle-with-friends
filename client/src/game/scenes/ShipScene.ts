@@ -1,12 +1,13 @@
 import Phaser from 'phaser';
 import { DbConnection } from '../../autobindings';
+import { Identity } from 'spacetimedb';
 import { World } from '../ecs/World';
 import { DragDropSystem } from '../systems/DragDropSystem';
 import { ComponentTypes, CrewData, ShopCrewData, GridPosition, Sprite, Draggable } from '../ecs/Components';
 
 export default class ShipScene extends Phaser.Scene {
   private connection!: DbConnection;
-  private localIdentity!: string;
+  private localIdentity!: Identity;
   private username!: string;
   private world!: World;
 

@@ -23,7 +23,7 @@ const PhaserGame: React.FC = () => {
 
       // Pass connection to Phaser
       gameRef.current.registry.set('connection', connection);
-      gameRef.current.registry.set('localIdentity', connection.identity?.toHexString());
+      gameRef.current.registry.set('localIdentity', connection.identity);
     }
 
     return () => {
