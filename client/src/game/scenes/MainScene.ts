@@ -1,10 +1,9 @@
 import Phaser from 'phaser';
-import { DbConnection, Player } from '../../autobindings';
+import { GameBridge } from '../GameBridge';
 
 export default class MainScene extends Phaser.Scene {
-  private connection!: DbConnection;
-  private localIdentity!: string;
-  private username!: string;
+  private gameBridge!: GameBridge;
+  private localPlayerIdentity!: string;
   private localPlayer!: Phaser.GameObjects.Rectangle;
   private localPlayerText!: Phaser.GameObjects.Text;
   private otherPlayers: Map<string, { sprite: Phaser.GameObjects.Rectangle, text: Phaser.GameObjects.Text }> = new Map();
@@ -17,26 +16,16 @@ export default class MainScene extends Phaser.Scene {
   }
 
   init() {
-    this.connection = this.registry.get('connection');
-    this.username = this.registry.get('username');
-    this.localIdentity = this.registry.get('localIdentity');
-
-    console.log('🎮 MainScene initialized', {
-      hasConnection: !!this.connection,
-      username: this.username,
-      localIdentity: this.localIdentity
-    });
+    this.gameBridge = this.registry.get('gameBridge');
   }
 
   create() {
-    console.log('🎮 Creating game scene...');
-
     // Background
     this.add.rectangle(400, 300, 800, 600, 0x1a1a1a);
 
     // Create local player
     this.localPlayer = this.add.rectangle(400, 300, 32, 32, 0x00ff00);
-    this.localPlayerText = this.add.text(400, 280, this.username || 'You', {
+    this.localPlayerText = this.add.text(400, 280, 'You', {
       fontSize: '12px',
       color: '#ffffff'
     }).setOrigin(0.5);
@@ -44,59 +33,38 @@ export default class MainScene extends Phaser.Scene {
     // Setup controls
     this.cursors = this.input.keyboard!.createCursorKeys();
 
-    // Subscribe to player table updates from SpacetimeDB
-    if (this.connection) {
-      const playerTable = this.connection.db.player;
+    // Subscribe to player updates from React
+    this.gameBridge.subscribe(() => {
+      this.syncPlayers();
+    });
 
-      const syncPlayers = () => {
-        this.syncPlayers();
-      };
-
-      playerTable.onInsert((player) => {
-        console.log('➕ Player inserted:', player.name);
-        syncPlayers();
-      });
-
-      playerTable.onUpdate((oldPlayer, newPlayer) => {
-        console.log('🔄 Player updated:', newPlayer.name);
-        syncPlayers();
-      });
-
-      playerTable.onDelete((player) => {
-        console.log('➖ Player deleted:', player.name);
-        syncPlayers();
-      });
-
-      // Initial sync
-      syncPlayers();
-    } else {
-      console.error('❌ No connection available!');
-    }
+    // Initial sync
+    this.syncPlayers();
   }
 
   syncPlayers() {
-    if (!this.connection) return;
-
-    const players = Array.from(this.connection.db.player.iter());
-    console.log('👥 Syncing players, total:', players.length);
-
+    const players = this.gameBridge.getPlayers();
+    const localIdentity = this.gameBridge.getLocalIdentity();
     const currentIdentities = new Set<string>();
+
+    if (!localIdentity) return; // Not ready yet
 
     players.forEach(player => {
       const identity = player.identity.toHexString();
       currentIdentities.add(identity);
 
-      if (identity === this.localIdentity) {
+      if (identity === localIdentity) {
+        // Update local player identity and name
+        if (!this.localPlayerIdentity) {
+          this.localPlayerIdentity = identity;
+        }
         // Update local player name from server
         this.localPlayerText.setText(player.name);
-        // Optionally sync position from server (for server authority)
-        // this.localPlayer.setPosition(player.x, player.y);
         return;
       }
 
       if (!this.otherPlayers.has(identity)) {
         // Create new player sprite
-        console.log('👤 Adding other player:', player.name, 'at', player.x, player.y);
         const sprite = this.add.rectangle(player.x, player.y, 32, 32, 0xff0000);
         const text = this.add.text(player.x, player.y - 20, player.name, {
           fontSize: '12px',
@@ -104,6 +72,7 @@ export default class MainScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         this.otherPlayers.set(identity, { sprite, text });
+        console.log('👤 Added other player:', player.name, 'at', player.x, player.y);
       } else {
         // Update existing player
         const playerObj = this.otherPlayers.get(identity)!;
@@ -121,7 +90,7 @@ export default class MainScene extends Phaser.Scene {
     // Remove players that left
     this.otherPlayers.forEach((playerObj, identity) => {
       if (!currentIdentities.has(identity)) {
-        console.log('👋 Removing player:', identity);
+        console.log('👋 Removed player:', identity);
         playerObj.sprite.destroy();
         playerObj.text.destroy();
         this.otherPlayers.delete(identity);
@@ -154,9 +123,7 @@ export default class MainScene extends Phaser.Scene {
 
     // Throttled position updates to server
     if (moved && time - this.lastUpdateTime > this.updateThrottle) {
-      if (this.connection) {
-        this.connection.reducers.updatePosition(this.localPlayer.x, this.localPlayer.y);
-      }
+      this.gameBridge.updatePosition(this.localPlayer.x, this.localPlayer.y);
       this.lastUpdateTime = time;
     }
   }
