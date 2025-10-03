@@ -22,23 +22,34 @@ export default class ShipScene extends Phaser.Scene {
   }
 
   preload() {
+    console.log('🔄 ShipScene preload started');
+
     // Load crew portraits for shop
-    this.load.image('shop-luffy', 'assets/shop/icon/Luffy.JPG');
-    this.load.image('shop-lysop', 'assets/shop/icon/Lysop.JPG');
-    this.load.image('shop-nami', 'assets/shop/icon/Nami.JPG');
-    this.load.image('shop-zoro', 'assets/shop/icon/Zoro.JPG');
+    this.load.image('shop-luffy', '/assets/shop/icon/Luffy.JPG');
+    this.load.image('shop-lysop', '/assets/shop/icon/Lysop.JPG');
+    this.load.image('shop-nami', '/assets/shop/icon/Nami.JPG');
+    this.load.image('shop-zoro', '/assets/shop/icon/Zoro.JPG');
 
     // Load unit sprites for field
-    this.load.image('unit-luffy', 'assets/unit/Luffy.PNG');
-    this.load.image('unit-lysop', 'assets/unit/Lysop.PNG');
-    this.load.image('unit-nami', 'assets/unit/Nami.PNG');
-    this.load.image('unit-zoro', 'assets/unit/Zoro.PNG');
+    this.load.image('unit-luffy', '/assets/unit/Luffy.PNG');
+    this.load.image('unit-lysop', '/assets/unit/Lysop.PNG');
+    this.load.image('unit-nami', '/assets/unit/Nami.PNG');
+    this.load.image('unit-zoro', '/assets/unit/Zoro.PNG');
 
     // Load trait icons
-    this.load.image('trait-marines', 'assets/trait/Marines.png');
-    this.load.image('trait-logia', 'assets/trait/Logia.png');
-    this.load.image('trait-paramecia', 'assets/trait/Paramecia.png');
-    this.load.image('trait-zoan', 'assets/trait/Zoan.png');
+    this.load.image('trait-marines', '/assets/trait/Marines.png');
+    this.load.image('trait-logia', '/assets/trait/Logia.png');
+    this.load.image('trait-paramecia', '/assets/trait/Paramecia.png');
+    this.load.image('trait-zoan', '/assets/trait/Zoan.png');
+
+    // Add load event listeners
+    this.load.on('complete', () => {
+      console.log('✅ ShipScene: All assets loaded successfully');
+    });
+
+    this.load.on('loaderror', (fileObj: any) => {
+      console.error('❌ ShipScene: Error loading asset:', fileObj.key, fileObj.url);
+    });
   }
 
   init() {
@@ -67,6 +78,14 @@ export default class ShipScene extends Phaser.Scene {
   }
 
   create() {
+    console.log('🎨 ShipScene create() started');
+
+    // Guard against missing connection/identity
+    if (!this.connection || !this.localIdentity) {
+      console.error('❌ Cannot create scene without connection/identity');
+      return;
+    }
+
     // Background
     this.add.rectangle(512, 384, 1024, 768, 0x4a90e2); // Ocean blue
 
@@ -86,6 +105,8 @@ export default class ShipScene extends Phaser.Scene {
     this.loadPlayerData();
     this.loadCrewData();
     this.loadShopData();
+
+    console.log('✅ ShipScene create() completed');
   }
 
   update(time: number, delta: number) {
