@@ -1,13 +1,12 @@
 import Phaser from 'phaser';
 import { GameBridge } from '../GameBridge';
-import { Player } from '../../autobindings';
 
 export default class MainScene extends Phaser.Scene {
   private gameBridge!: GameBridge;
   private playerIdentity!: string;
   private localPlayer!: Phaser.GameObjects.Rectangle;
   private localPlayerText!: Phaser.GameObjects.Text;
-  private otherPlayers: Mapy = new Map();
+  private otherPlayers: Map = new Map();
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private lastUpdateTime: number = 0;
   private updateThrottle: number = 50; // ms between updates

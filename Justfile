@@ -1,4 +1,5 @@
 module := "battle-with-friends"
+live-module := "battle-with-friends-maincloud"
 
 server:
     spacetime publish -p ./server-rust {{module}} -y -c
@@ -21,4 +22,4 @@ build:
     cd client && bun run build
 
 publish server:
-    spacetime publish -p ./server-rust -s maincloud {{module}} --delete-data
+    spacetime publish -p ./server-rust -s maincloud {{live-module}} --delete-data

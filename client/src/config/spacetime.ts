@@ -1,4 +1,4 @@
-const SPACETIME_DB_LIVE = "battle-with-friends";
+const SPACETIME_DB_LIVE = "battle-with-friends-maincloud";
 const SPACETIME_DB_DEV = "battle-with-friends";
 
 const LOCAL_SPACETIMEDB_URI = "ws://localhost:3000";

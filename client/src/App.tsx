@@ -1,16 +1,16 @@
 import React from 'react';
-import { useOidc, useOidcAccessToken } from '@axa-fr/react-oidc';
+import { useAuth } from 'react-oidc-context';
 import GameWrapper from './components/GameWrapper';
 
 const App: React.FC = () => {
-  const { isAuthenticated, login } = useOidc();
+  const { isAuthenticated, signinRedirect } = useAuth();
 
   if (!isAuthenticated) {
     return (
       
         Battle with Friends
         <button
-          onClick={() => login()}
+          onClick={() => signinRedirect()}
           style={{
             padding: '12px 24px',
             fontSize: '16px',
@@ -22,7 +22,7 @@ const App: React.FC = () => {
           }}
         >
           Login to Play
-        
+
       
     );
   }

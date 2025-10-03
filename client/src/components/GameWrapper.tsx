@@ -1,37 +1,48 @@
 import React, { useEffect, useState } from 'react';
-import { useOidcAccessToken } from '@axa-fr/react-oidc';
-import { useSpacetimeDB, useTable } from '@spacetimedb/sdk';
-import { DbConnection, Player } from '../autobindings';
+import { useAuth } from 'react-oidc-context';
+import { useSpacetimeDB } from './SpacetimeDBProvider';
+import { Player } from '../autobindings';
 import PhaserGame from '../game/PhaserGame';
 import { GameBridge } from '../game/GameBridge';
 
 const GameWrapper: React.FC = () => {
-  const { accessToken, accessTokenPayload } = useOidcAccessToken();
+  const auth = useAuth();
   const conn = useSpacetimeDB();
-  const { rows: players } = useTable('player');
+  const [players, setPlayers] = useState<Player[]>([]);
   const [gameBridge] = useState(() => new GameBridge());
   const [registered, setRegistered] = useState(false);
 
-  // Connect with auth token
-  useEffect(() => {
-    if (accessToken && conn) {
-      conn.connect({ token: accessToken }).then(() => {
-        console.log('Connected to SpacetimeDB');
-      });
-    }
-  }, [accessToken, conn]);
-
   // Register player once connected
   useEffect(() => {
-    if (conn?.connected && !registered && accessTokenPayload?.name) {
-      conn.db.register_player(accessTokenPayload.name);
+    if (conn && !registered && auth.user?.profile?.name) {
+      conn.reducers.registerPlayer(auth.user.profile.name as string);
       setRegistered(true);
     }
-  }, [conn?.connected, registered, accessTokenPayload]);
+  }, [conn, registered, auth.user?.profile?.name]);
+
+  // Subscribe to player table updates
+  useEffect(() => {
+    if (conn) {
+      const playerTable = conn.db.player;
+
+      const updatePlayers = () => {
+        const allPlayers = Array.from(playerTable.iter());
+        setPlayers(allPlayers);
+      };
+
+      // Initial load
+      updatePlayers();
+
+      // Listen for updates
+      playerTable.onInsert(updatePlayers);
+      playerTable.onUpdate(updatePlayers);
+      playerTable.onDelete(updatePlayers);
+    }
+  }, [conn]);
 
   // Sync players to game via bridge
   useEffect(() => {
-    if (players && conn?.identity) {
+    if (players.length > 0 && conn?.identity) {
       gameBridge.updatePlayers(players, conn.identity.toHexString());
     }
   }, [players, conn?.identity, gameBridge]);
@@ -40,21 +51,13 @@ const GameWrapper: React.FC = () => {
   useEffect(() => {
     if (conn) {
       gameBridge.onPositionUpdate = (x: number, y: number) => {
-        conn.db.update_position(x, y);
+        conn.reducers.updatePosition(x, y);
       };
     }
   }, [conn, gameBridge]);
 
-  if (!conn?.connected) {
-    return (
-      
-        Connecting to game server...
-      
-    );
-  }
-
   return (
-    
+    <PhaserGame bridge={gameBridge} />
   );
 };
 

@@ -1,12 +1,10 @@
 import { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { AuthProvider, useAuth } from 'react-oidc-context';
+import { SpacetimeDBProvider } from './components/SpacetimeDBProvider';
 import { DbConnection } from './autobindings';
-import { getSpacetimeConfig, getStoredToken } from './config/spacetime';
-import PhaserGame from './game/PhaserGame';
-
-// Get environment-specific SpacetimeDB configuration
-const spacetimeConfig = getSpacetimeConfig();
+import { getSpacetimeConfig } from './config/spacetime';
+import App from './App';
 
 const oidcConfig = {
   authority: 'https://spacetimeauth.staging.spacetimedb.com/oidc',
@@ -21,11 +19,41 @@ function onSigninCallback() {
   window.history.replaceState({}, document.title, window.location.pathname);
 }
 
-// SpacetimeDB connection builder with environment-specific config
-const connectionBuilder = DbConnection.builder()
-  .withUri(spacetimeConfig.uri)
-  .withModuleName(spacetimeConfig.moduleName)
-  .withToken(getStoredToken() || '');
+// Wrapper component that initializes SpacetimeDB after auth
+function AppWithSpacetime() {
+  const auth = useAuth();
+
+  // Wait for authentication
+  if (auth.isLoading) {
+    return <div>Loading authentication...</div>;
+  }
+
+  // If not authenticated, show App (which will show login button)
+  if (!auth.isAuthenticated || !auth.user?.access_token) {
+    return <App />;
+  }
+
+  // Initialize SpacetimeDB connection with auth token
+  const spacetimeConfig = getSpacetimeConfig();
+  const connection = DbConnection.builder()
+    .withUri(spacetimeConfig.uri)
+    .withModuleName(spacetimeConfig.moduleName)
+    .withToken(auth.user.access_token)
+    .onConnect((conn, identity, token) => {
+      console.log('Connected to SpacetimeDB', { identity: identity.toHexString() });
+      localStorage.setItem(spacetimeConfig.tokenKey, token);
+    })
+    .onConnectError((error) => {
+      console.error('Failed to connect to SpacetimeDB:', error);
+    })
+    .build();
+
+  return (
+    <SpacetimeDBProvider connection={connection}>
+      <App />
+    </SpacetimeDBProvider>
+  );
+}
 
 export function OidcDebug() {
   const auth = useAuth();
@@ -81,8 +109,6 @@ root.render(
     onSigninCallback={onSigninCallback}
   >
     <OidcDebug />
-    <SpacetimeDBProvider connection={connectionBuilder.build()}>
-      <PhaserGame />
-    </SpacetimeDBProvider>
+    <AppWithSpacetime />
   </AuthProvider>
 );
