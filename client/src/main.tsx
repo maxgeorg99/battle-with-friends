@@ -48,6 +48,19 @@ function AppWithSpacetime() {
     return <App />;
   }
 
+  // Extract username from JWT token
+  const getUsername = () => {
+    try {
+      const decoded: any = auth.user?.profile || {};
+      return decoded.preferred_username || decoded.name || decoded.email || decoded.sub || 'Player';
+    } catch (e) {
+      console.error('Failed to get username:', e);
+      return 'Player';
+    }
+  };
+
+  const username = getUsername();
+
   // Initialize SpacetimeDB connection with auth token
   const spacetimeConfig = getSpacetimeConfig();
   const connection = DbConnection.builder()
@@ -55,11 +68,18 @@ function AppWithSpacetime() {
     .withModuleName(spacetimeConfig.moduleName)
     .withToken(auth.user.access_token)
     .onConnect((conn, identity, token) => {
-      console.log('Connected to SpacetimeDB', { identity: identity.toHexString() });
+      console.log('✅ Connected to SpacetimeDB', {
+        identity: identity.toHexString(),
+        username
+      });
       localStorage.setItem(spacetimeConfig.tokenKey, token);
+
+      // Register player immediately after connection is established
+      console.log('Registering player with username:', username);
+      conn.reducers.registerPlayer(username);
     })
     .onConnectError((error) => {
-      console.error('Failed to connect to SpacetimeDB:', error);
+      console.error('❌ Failed to connect to SpacetimeDB:', error);
     })
     .build();
 
