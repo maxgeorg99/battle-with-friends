@@ -156,15 +156,15 @@ pub fn refresh_shop(ctx: &ReducerContext) -> Result<(), String> {
         ("Nami", CrewRarity::Common, CrewTrait::StrawHat, None, 50, 12, 6, 20),
         ("Usopp", CrewRarity::Common, CrewTrait::StrawHat, None, 60, 15, 5, 20),
         ("Sanji", CrewRarity::Rare, CrewTrait::StrawHat, None, 75, 18, 10, 35),
-        ("Tony Tony Chopper", CrewRarity::Common, CrewTrait::StrawHat, Some(CrewTrait::DFUser), 55, 10, 12, 25),
+        //("Tony Tony Chopper", CrewRarity::Common, CrewTrait::StrawHat, Some(CrewTrait::DFUser), 55, 10, 12, 25),
 
         // Marines
-        ("Marine Soldier", CrewRarity::Common, CrewTrait::Marine, None, 50, 10, 8, 15),
-        ("Smoker", CrewRarity::Epic, CrewTrait::Marine, Some(CrewTrait::DFUser), 90, 22, 12, 60),
+        //("Marine Soldier", CrewRarity::Common, CrewTrait::Marine, None, 50, 10, 8, 15),
+        //("Smoker", CrewRarity::Epic, CrewTrait::Marine, Some(CrewTrait::DFUser), 90, 22, 12, 60),
 
         // Others
-        ("Pirate Rookie", CrewRarity::Common, CrewTrait::Supernova, None, 45, 12, 5, 18),
-        ("Trafalgar Law", CrewRarity::Epic, CrewTrait::Supernova, Some(CrewTrait::DFUser), 85, 24, 10, 70),
+        //("Pirate Rookie", CrewRarity::Common, CrewTrait::Supernova, None, 45, 12, 5, 18),
+        //("Trafalgar Law", CrewRarity::Epic, CrewTrait::Supernova, Some(CrewTrait::DFUser), 85, 24, 10, 70),
     ];
 
     // Generate 5 random crew from pool

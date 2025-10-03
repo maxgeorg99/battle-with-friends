@@ -21,6 +21,26 @@ export default class ShipScene extends Phaser.Scene {
     super('ShipScene');
   }
 
+  preload() {
+    // Load crew portraits for shop
+    this.load.image('shop-luffy', 'assets/shop/icon/Luffy.JPG');
+    this.load.image('shop-lysop', 'assets/shop/icon/Lysop.JPG');
+    this.load.image('shop-nami', 'assets/shop/icon/Nami.JPG');
+    this.load.image('shop-zoro', 'assets/shop/icon/Zoro.JPG');
+
+    // Load unit sprites for field
+    this.load.image('unit-luffy', 'assets/unit/Luffy.PNG');
+    this.load.image('unit-lysop', 'assets/unit/Lysop.PNG');
+    this.load.image('unit-nami', 'assets/unit/Nami.PNG');
+    this.load.image('unit-zoro', 'assets/unit/Zoro.PNG');
+
+    // Load trait icons
+    this.load.image('trait-marines', 'assets/trait/Marines.png');
+    this.load.image('trait-logia', 'assets/trait/Logia.png');
+    this.load.image('trait-paramecia', 'assets/trait/Paramecia.png');
+    this.load.image('trait-zoan', 'assets/trait/Zoan.png');
+  }
+
   init() {
     this.connection = this.registry.get('connection');
     this.username = this.registry.get('username');
@@ -305,6 +325,18 @@ export default class ShipScene extends Phaser.Scene {
   private createCrewCard(crew: any, isShopCard: boolean): Phaser.GameObjects.Container {
     const container = this.add.container(0, 0);
 
+    // Map crew name to sprite key
+    const getCrewSpriteKey = (name: string): string => {
+      const nameLower = name.toLowerCase().replace(/\s+/g, '');
+      if (nameLower.includes('luffy')) return isShopCard ? 'shop-luffy' : 'unit-luffy';
+      if (nameLower.includes('zoro')) return isShopCard ? 'shop-zoro' : 'unit-zoro';
+      if (nameLower.includes('nami')) return isShopCard ? 'shop-nami' : 'unit-nami';
+      if (nameLower.includes('usopp') || nameLower.includes('lysop')) return isShopCard ? 'shop-lysop' : 'unit-lysop';
+      return ''; // Fallback - will show colored rectangle
+    };
+
+    const spriteKey = getCrewSpriteKey(crew.name);
+
     // Card background based on rarity
     const rarityColors: Record<string, number> = {
       Common: 0xcccccc,
@@ -313,37 +345,57 @@ export default class ShipScene extends Phaser.Scene {
       Legendary: 0xffd700,
     };
 
-    const bg = this.add.rectangle(0, 0, 100, 120, rarityColors[crew.rarity] || 0xcccccc)
-      .setStrokeStyle(2, 0x000000);
-    container.add(bg);
+    if (spriteKey && this.textures.exists(spriteKey)) {
+      // Use sprite image
+      const sprite = this.add.image(0, 0, spriteKey);
+      sprite.setDisplaySize(100, 120);
+      container.add(sprite);
+
+      // Add rarity border
+      const border = this.add.rectangle(0, 0, 100, 120)
+        .setStrokeStyle(3, rarityColors[crew.rarity] || 0xcccccc)
+        .setFillStyle(0x000000, 0);
+      container.add(border);
+    } else {
+      // Fallback colored rectangle
+      const bg = this.add.rectangle(0, 0, 100, 120, rarityColors[crew.rarity] || 0xcccccc)
+        .setStrokeStyle(2, 0x000000);
+      container.add(bg);
+    }
 
     // Crew name
-    const nameText = this.add.text(0, -45, crew.name, {
+    const nameText = this.add.text(0, -55, crew.name, {
       fontSize: '10px',
       color: '#fff',
       fontStyle: 'bold',
       align: 'center',
       wordWrap: { width: 90 },
+      backgroundColor: '#000000',
+      padding: { x: 4, y: 2 },
     }).setOrigin(0.5);
     container.add(nameText);
 
-    // Stats
-    const statsText = this.add.text(0, 15,
-      `HP: ${crew.currentHp || crew.maxHp}\nATK: ${crew.attack}\nDEF: ${crew.defense}`,
+    // Stats overlay
+    const statsText = this.add.text(0, 50,
+      `HP: ${crew.currentHp || crew.maxHp} ATK: ${crew.attack} DEF: ${crew.defense}`,
       {
-        fontSize: '10px',
+        fontSize: '8px',
         color: '#fff',
         align: 'center',
+        backgroundColor: '#000000',
+        padding: { x: 4, y: 2 },
       }
     ).setOrigin(0.5);
     container.add(statsText);
 
     // Cost (for shop cards)
     if (isShopCard) {
-      const costText = this.add.text(0, 50, `⚡${crew.cost}`, {
-        fontSize: '14px',
+      const costText = this.add.text(0, 60, `⚡${crew.cost}`, {
+        fontSize: '12px',
         color: '#ffd700',
         fontStyle: 'bold',
+        backgroundColor: '#000000',
+        padding: { x: 4, y: 2 },
       }).setOrigin(0.5);
       container.add(costText);
     }
