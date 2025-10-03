@@ -9,7 +9,10 @@ const PhaserGame: React.FC = () => {
   const { connection } = useSpacetimeDBConnection();
 
   useEffect(() => {
-    if (!gameRef.current && containerRef.current && connection) {
+    // Wait for both connection AND identity to be available
+    if (!gameRef.current && containerRef.current && connection && connection.identity) {
+      console.log('🎮 Creating Phaser game with identity:', connection.identity.toHexString());
+
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
         width: 1024,

@@ -26,7 +26,20 @@ export default class ShipScene extends Phaser.Scene {
     this.username = this.registry.get('username');
     this.localIdentity = this.registry.get('localIdentity');
 
-    console.log('🚢 ShipScene initialized');
+    console.log('🚢 ShipScene initialized', {
+      hasConnection: !!this.connection,
+      hasIdentity: !!this.localIdentity,
+      identityValue: this.localIdentity,
+      username: this.username
+    });
+
+    if (!this.connection || !this.localIdentity) {
+      console.error('❌ Missing connection or identity!', {
+        connection: this.connection,
+        localIdentity: this.localIdentity
+      });
+      return;
+    }
 
     // Initialize ECS
     this.world = new World();
@@ -163,49 +176,51 @@ export default class ShipScene extends Phaser.Scene {
   }
 
   private subscribeToDatabase() {
-    if (!this.connection) return;
+    if (!this.connection || !this.localIdentity) return;
 
     // Subscribe to player updates
     this.connection.db.player.onUpdate((oldPlayer, newPlayer) => {
-      if (newPlayer.identity.isEqual(this.localIdentity)) {
+      if (this.localIdentity && newPlayer.identity.isEqual(this.localIdentity)) {
         this.updatePlayerUI(newPlayer);
       }
     });
 
     // Subscribe to crew updates
     this.connection.db.crew.onInsert((crew) => {
-      if (crew.owner.isEqual(this.localIdentity)) {
+      if (this.localIdentity && crew.owner.isEqual(this.localIdentity)) {
         this.addCrewEntity(crew);
       }
     });
 
     this.connection.db.crew.onUpdate((oldCrew, newCrew) => {
-      if (newCrew.owner.isEqual(this.localIdentity)) {
+      if (this.localIdentity && newCrew.owner.isEqual(this.localIdentity)) {
         this.updateCrewEntity(newCrew);
       }
     });
 
     this.connection.db.crew.onDelete((crew) => {
-      if (crew.owner.isEqual(this.localIdentity)) {
+      if (this.localIdentity && crew.owner.isEqual(this.localIdentity)) {
         this.removeCrewEntity(crew.id);
       }
     });
 
     // Subscribe to shop updates
     this.connection.db.shopCrew.onInsert((shopCrew) => {
-      if (shopCrew.player.isEqual(this.localIdentity)) {
+      if (this.localIdentity && shopCrew.player.isEqual(this.localIdentity)) {
         this.addShopCrewCard(shopCrew);
       }
     });
 
     this.connection.db.shopCrew.onDelete((shopCrew) => {
-      if (shopCrew.player.isEqual(this.localIdentity)) {
+      if (this.localIdentity && shopCrew.player.isEqual(this.localIdentity)) {
         this.removeShopCrewCard(shopCrew.id);
       }
     });
   }
 
   private loadPlayerData() {
+    if (!this.connection || !this.localIdentity) return;
+
     const player = Array.from(this.connection.db.player.iter())
       .find(p => p.identity.isEqual(this.localIdentity));
 
@@ -215,6 +230,8 @@ export default class ShipScene extends Phaser.Scene {
   }
 
   private loadCrewData() {
+    if (!this.connection || !this.localIdentity) return;
+
     const crewList = Array.from(this.connection.db.crew.iter())
       .filter(c => c.owner.isEqual(this.localIdentity));
 
@@ -224,6 +241,8 @@ export default class ShipScene extends Phaser.Scene {
   }
 
   private loadShopData() {
+    if (!this.connection || !this.localIdentity) return;
+
     const shopList = Array.from(this.connection.db.shopCrew.iter())
       .filter(s => s.player.isEqual(this.localIdentity));
 
@@ -391,6 +410,8 @@ export default class ShipScene extends Phaser.Scene {
   }
 
   private buyCrewFromShop(shopCrewId: bigint) {
+    if (!this.connection || !this.localIdentity) return;
+
     console.log('Buying crew from shop:', shopCrewId);
     // Find empty slot
     const occupiedSlots = Array.from(this.connection.db.crew.iter())
