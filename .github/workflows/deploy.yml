@@ -22,16 +22,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
 
       - name: Install dependencies
-        run: cd client && npm ci
+        run: cd client && bun install --frozen-lockfile
 
       - name: Build
-        run: cd client && npm run build
+        run: cd client && bun run build
         env:
           # Set base path for GitHub Pages (replace with your repo name)
           VITE_BASE_PATH: /battle-with-friends/
