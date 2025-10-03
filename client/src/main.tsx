@@ -9,14 +9,13 @@ import App from './App';
 // Get environment-specific SpacetimeDB configuration
 const spacetimeConfig = getSpacetimeConfig();
 
-// Configure your SpacetimeDB OIDC settings here
 const oidcConfig = {
-  client_id: 'your-client-id',
-  redirect_uri: window.location.origin + '/authentication/callback',
-  silent_redirect_uri: window.location.origin + '/authentication/silent-callback',
+  authority: 'https://spacetimeauth.staging.spacetimedb.com/oidc',
+  client_id: 'client_031CSnBZhPFgz5oj5Alo0a',
+  redirect_uri: `${window.location.origin}/callback`,
   scope: 'openid profile email',
-  authority: 'https://staging.spacetimedb.com',
-  service_worker_only: false,
+  response_type: 'code',
+  automaticSilentRenew: true,
 };
 
 function onSigninCallback() {
