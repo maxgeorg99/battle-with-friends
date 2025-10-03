@@ -3,10 +3,10 @@ import { GameBridge } from '../GameBridge';
 
 export default class MainScene extends Phaser.Scene {
   private gameBridge!: GameBridge;
-  private playerIdentity!: string;
+  private localPlayerIdentity!: string;
   private localPlayer!: Phaser.GameObjects.Rectangle;
   private localPlayerText!: Phaser.GameObjects.Text;
-  private otherPlayers: Map = new Map();
+  private otherPlayers: Map<string, { sprite: Phaser.GameObjects.Rectangle, text: Phaser.GameObjects.Text }> = new Map();
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private lastUpdateTime: number = 0;
   private updateThrottle: number = 50; // ms between updates
@@ -17,7 +17,6 @@ export default class MainScene extends Phaser.Scene {
 
   init() {
     this.gameBridge = this.registry.get('gameBridge');
-    this.playerIdentity = this.registry.get('playerIdentity');
   }
 
   create() {
@@ -45,14 +44,22 @@ export default class MainScene extends Phaser.Scene {
 
   syncPlayers() {
     const players = this.gameBridge.getPlayers();
-    const currentIdentities = new Set();
+    const localIdentity = this.gameBridge.getLocalIdentity();
+    const currentIdentities = new Set<string>();
+
+    if (!localIdentity) return; // Not ready yet
 
     players.forEach(player => {
       const identity = player.identity.toHexString();
       currentIdentities.add(identity);
 
-      if (identity === this.playerIdentity) {
-        // Skip local player - we control it directly
+      if (identity === localIdentity) {
+        // Update local player identity and name
+        if (!this.localPlayerIdentity) {
+          this.localPlayerIdentity = identity;
+        }
+        // Update local player name from server
+        this.localPlayerText.setText(player.name);
         return;
       }
 
@@ -65,12 +72,14 @@ export default class MainScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         this.otherPlayers.set(identity, { sprite, text });
+        console.log('👤 Added other player:', player.name, 'at', player.x, player.y);
       } else {
         // Update existing player
         const playerObj = this.otherPlayers.get(identity)!;
         playerObj.sprite.setPosition(player.x, player.y);
         playerObj.text.setPosition(player.x, player.y - 20);
-        
+        playerObj.text.setText(player.name);
+
         // Update opacity based on online status
         const alpha = player.online ? 1 : 0.3;
         playerObj.sprite.setAlpha(alpha);
@@ -81,6 +90,7 @@ export default class MainScene extends Phaser.Scene {
     // Remove players that left
     this.otherPlayers.forEach((playerObj, identity) => {
       if (!currentIdentities.has(identity)) {
+        console.log('👋 Removed player:', identity);
         playerObj.sprite.destroy();
         playerObj.text.destroy();
         this.otherPlayers.delete(identity);
