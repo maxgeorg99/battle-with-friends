@@ -1,38 +1,29 @@
 import React, { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
-import MainScene from './scenes/MainScene';
-import { GameBridge } from './GameBridge';
+import ShipScene from './scenes/ShipScene';
+import { useSpacetimeDBConnection } from '../components/SpacetimeDBProvider';
 
-interface PhaserGameProps {
-  bridge: GameBridge;
-}
-
-const PhaserGame: React.FC<PhaserGameProps> = ({ bridge }) => {
+const PhaserGame: React.FC = () => {
   const gameRef = useRef<Phaser.Game | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { connection } = useSpacetimeDBConnection();
 
   useEffect(() => {
-    if (!gameRef.current && containerRef.current) {
+    if (!gameRef.current && containerRef.current && connection) {
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
-        width: 800,
-        height: 600,
+        width: 1024,
+        height: 768,
         parent: containerRef.current,
-        backgroundColor: '#1a1a1a',
-        physics: {
-          default: 'arcade',
-          arcade: {
-            gravity: { y: 0 },
-            debug: false,
-          },
-        },
-        scene: MainScene,
+        backgroundColor: '#4a90e2',
+        scene: ShipScene,
       };
 
       gameRef.current = new Phaser.Game(config);
 
-      // Pass bridge to Phaser
-      gameRef.current.registry.set('gameBridge', bridge);
+      // Pass connection to Phaser
+      gameRef.current.registry.set('connection', connection);
+      gameRef.current.registry.set('localIdentity', connection.identity?.toHexString());
     }
 
     return () => {
@@ -41,7 +32,7 @@ const PhaserGame: React.FC<PhaserGameProps> = ({ bridge }) => {
         gameRef.current = null;
       }
     };
-  }, [bridge]);
+  }, [connection]);
 
   return (
     <div

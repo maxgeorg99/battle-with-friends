@@ -26,12 +26,19 @@ import {
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
 } from "spacetimedb";
+import { ShipType } from "./ship_type_type";
+// Mark import as potentially unused
+declare type __keep_ShipType = ShipType;
+
 
 export type Player = {
   identity: __Identity,
   name: string,
-  x: number,
-  y: number,
+  berries: number,
+  bounty: number,
+  wins: number,
+  losses: number,
+  shipType: ShipType,
   online: boolean,
 };
 /**
@@ -47,8 +54,11 @@ export const Player = {
       elements: [
         { name: "identity", algebraicType: __AlgebraicTypeValue.createIdentityType()},
         { name: "name", algebraicType: __AlgebraicTypeValue.String},
-        { name: "x", algebraicType: __AlgebraicTypeValue.F32},
-        { name: "y", algebraicType: __AlgebraicTypeValue.F32},
+        { name: "berries", algebraicType: __AlgebraicTypeValue.U32},
+        { name: "bounty", algebraicType: __AlgebraicTypeValue.U32},
+        { name: "wins", algebraicType: __AlgebraicTypeValue.U32},
+        { name: "losses", algebraicType: __AlgebraicTypeValue.U32},
+        { name: "shipType", algebraicType: ShipType.getTypeScriptAlgebraicType()},
         { name: "online", algebraicType: __AlgebraicTypeValue.Bool},
       ]
     });

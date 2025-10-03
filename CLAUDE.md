@@ -127,3 +127,5 @@ spacetimedb publish battle-with-friends                              # Dev/Stagi
 - Use `GameBridge` as the intermediary
 - React side: calls `gameBridge.updatePlayers(...)`
 - Phaser side: calls `bridge.updatePosition(...)` via callbacks
+
+![img.png](wireframe.png)

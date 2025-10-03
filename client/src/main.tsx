@@ -74,12 +74,18 @@ function AppWithSpacetime() {
       });
       localStorage.setItem(spacetimeConfig.tokenKey, token);
 
-      // Register player immediately after connection is established
-      console.log('Registering player with username:', username);
+      // Subscribe to all tables
+      console.log('📡 Subscribing to SpacetimeDB tables...');
       conn.subscriptionBuilder()
           .subscribe([
             "SELECT * FROM player",
+            "SELECT * FROM crew",
+            "SELECT * FROM shop_crew",
+            "SELECT * FROM battle",
           ]);
+
+      // Register player immediately after connection is established
+      console.log('Registering player with username:', username);
       conn.reducers.registerPlayer(username);
     })
     .onConnectError((error) => {

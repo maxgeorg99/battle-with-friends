@@ -27,6 +27,10 @@ import {
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
 } from "spacetimedb";
 import { Player } from "./player_type";
+import { ShipType } from "./ship_type_type";
+// Mark import as potentially unused
+declare type __keep_ShipType = ShipType;
+
 import { type EventContext, type Reducer, RemoteReducers, RemoteTables } from ".";
 declare type __keep = [EventContext, Reducer, RemoteReducers, RemoteTables];
 

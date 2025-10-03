@@ -30,25 +30,69 @@ import {
 } from "spacetimedb";
 
 // Import and reexport all reducer arg types
+import { BuyCrew } from "./buy_crew_reducer.ts";
+export { BuyCrew };
 import { ClientConnected } from "./client_connected_reducer.ts";
 export { ClientConnected };
 import { ClientDisconnected } from "./client_disconnected_reducer.ts";
 export { ClientDisconnected };
+import { MoveCrew } from "./move_crew_reducer.ts";
+export { MoveCrew };
+import { RefreshShop } from "./refresh_shop_reducer.ts";
+export { RefreshShop };
 import { RegisterPlayer } from "./register_player_reducer.ts";
 export { RegisterPlayer };
-import { UpdatePosition } from "./update_position_reducer.ts";
-export { UpdatePosition };
+import { StartBattle } from "./start_battle_reducer.ts";
+export { StartBattle };
 
 // Import and reexport all table handle types
+import { BattleTableHandle } from "./battle_table.ts";
+export { BattleTableHandle };
+import { CrewTableHandle } from "./crew_table.ts";
+export { CrewTableHandle };
 import { PlayerTableHandle } from "./player_table.ts";
 export { PlayerTableHandle };
+import { ShopCrewTableHandle } from "./shop_crew_table.ts";
+export { ShopCrewTableHandle };
 
 // Import and reexport all types
+import { Battle } from "./battle_type.ts";
+export { Battle };
+import { BattleStatus } from "./battle_status_type.ts";
+export { BattleStatus };
+import { Crew } from "./crew_type.ts";
+export { Crew };
+import { CrewRarity } from "./crew_rarity_type.ts";
+export { CrewRarity };
+import { CrewTrait } from "./crew_trait_type.ts";
+export { CrewTrait };
 import { Player } from "./player_type.ts";
 export { Player };
+import { ShipType } from "./ship_type_type.ts";
+export { ShipType };
+import { ShopCrew } from "./shop_crew_type.ts";
+export { ShopCrew };
 
 const REMOTE_MODULE = {
   tables: {
+    battle: {
+      tableName: "battle",
+      rowType: Battle.getTypeScriptAlgebraicType(),
+      primaryKey: "id",
+      primaryKeyInfo: {
+        colName: "id",
+        colType: (Battle.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
+      },
+    },
+    crew: {
+      tableName: "crew",
+      rowType: Crew.getTypeScriptAlgebraicType(),
+      primaryKey: "id",
+      primaryKeyInfo: {
+        colName: "id",
+        colType: (Crew.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
+      },
+    },
     player: {
       tableName: "player",
       rowType: Player.getTypeScriptAlgebraicType(),
@@ -58,8 +102,21 @@ const REMOTE_MODULE = {
         colType: (Player.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
       },
     },
+    shop_crew: {
+      tableName: "shop_crew",
+      rowType: ShopCrew.getTypeScriptAlgebraicType(),
+      primaryKey: "id",
+      primaryKeyInfo: {
+        colName: "id",
+        colType: (ShopCrew.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
+      },
+    },
   },
   reducers: {
+    buy_crew: {
+      reducerName: "buy_crew",
+      argsType: BuyCrew.getTypeScriptAlgebraicType(),
+    },
     client_connected: {
       reducerName: "client_connected",
       argsType: ClientConnected.getTypeScriptAlgebraicType(),
@@ -68,13 +125,21 @@ const REMOTE_MODULE = {
       reducerName: "client_disconnected",
       argsType: ClientDisconnected.getTypeScriptAlgebraicType(),
     },
+    move_crew: {
+      reducerName: "move_crew",
+      argsType: MoveCrew.getTypeScriptAlgebraicType(),
+    },
+    refresh_shop: {
+      reducerName: "refresh_shop",
+      argsType: RefreshShop.getTypeScriptAlgebraicType(),
+    },
     register_player: {
       reducerName: "register_player",
       argsType: RegisterPlayer.getTypeScriptAlgebraicType(),
     },
-    update_position: {
-      reducerName: "update_position",
-      argsType: UpdatePosition.getTypeScriptAlgebraicType(),
+    start_battle: {
+      reducerName: "start_battle",
+      argsType: StartBattle.getTypeScriptAlgebraicType(),
     },
   },
   versionInfo: {
@@ -106,14 +171,33 @@ const REMOTE_MODULE = {
 
 // A type representing all the possible variants of a reducer.
 export type Reducer = never
+| { name: "BuyCrew", args: BuyCrew }
 | { name: "ClientConnected", args: ClientConnected }
 | { name: "ClientDisconnected", args: ClientDisconnected }
+| { name: "MoveCrew", args: MoveCrew }
+| { name: "RefreshShop", args: RefreshShop }
 | { name: "RegisterPlayer", args: RegisterPlayer }
-| { name: "UpdatePosition", args: UpdatePosition }
+| { name: "StartBattle", args: StartBattle }
 ;
 
 export class RemoteReducers {
   constructor(private connection: __DbConnectionImpl, private setCallReducerFlags: SetReducerFlags) {}
+
+  buyCrew(shopCrewId: bigint, slotIndex: number | undefined) {
+    const __args = { shopCrewId, slotIndex };
+    let __writer = new __BinaryWriter(1024);
+    BuyCrew.serialize(__writer, __args);
+    let __argsBuffer = __writer.getBuffer();
+    this.connection.callReducer("buy_crew", __argsBuffer, this.setCallReducerFlags.buyCrewFlags);
+  }
+
+  onBuyCrew(callback: (ctx: ReducerEventContext, shopCrewId: bigint, slotIndex: number | undefined) => void) {
+    this.connection.onReducer("buy_crew", callback);
+  }
+
+  removeOnBuyCrew(callback: (ctx: ReducerEventContext, shopCrewId: bigint, slotIndex: number | undefined) => void) {
+    this.connection.offReducer("buy_crew", callback);
+  }
 
   onClientConnected(callback: (ctx: ReducerEventContext) => void) {
     this.connection.onReducer("client_connected", callback);
@@ -129,6 +213,34 @@ export class RemoteReducers {
 
   removeOnClientDisconnected(callback: (ctx: ReducerEventContext) => void) {
     this.connection.offReducer("client_disconnected", callback);
+  }
+
+  moveCrew(crewId: bigint, newSlot: number | undefined) {
+    const __args = { crewId, newSlot };
+    let __writer = new __BinaryWriter(1024);
+    MoveCrew.serialize(__writer, __args);
+    let __argsBuffer = __writer.getBuffer();
+    this.connection.callReducer("move_crew", __argsBuffer, this.setCallReducerFlags.moveCrewFlags);
+  }
+
+  onMoveCrew(callback: (ctx: ReducerEventContext, crewId: bigint, newSlot: number | undefined) => void) {
+    this.connection.onReducer("move_crew", callback);
+  }
+
+  removeOnMoveCrew(callback: (ctx: ReducerEventContext, crewId: bigint, newSlot: number | undefined) => void) {
+    this.connection.offReducer("move_crew", callback);
+  }
+
+  refreshShop() {
+    this.connection.callReducer("refresh_shop", new Uint8Array(0), this.setCallReducerFlags.refreshShopFlags);
+  }
+
+  onRefreshShop(callback: (ctx: ReducerEventContext) => void) {
+    this.connection.onReducer("refresh_shop", callback);
+  }
+
+  removeOnRefreshShop(callback: (ctx: ReducerEventContext) => void) {
+    this.connection.offReducer("refresh_shop", callback);
   }
 
   registerPlayer(name: string) {
@@ -147,33 +259,44 @@ export class RemoteReducers {
     this.connection.offReducer("register_player", callback);
   }
 
-  updatePosition(x: number, y: number) {
-    const __args = { x, y };
-    let __writer = new __BinaryWriter(1024);
-    UpdatePosition.serialize(__writer, __args);
-    let __argsBuffer = __writer.getBuffer();
-    this.connection.callReducer("update_position", __argsBuffer, this.setCallReducerFlags.updatePositionFlags);
+  startBattle() {
+    this.connection.callReducer("start_battle", new Uint8Array(0), this.setCallReducerFlags.startBattleFlags);
   }
 
-  onUpdatePosition(callback: (ctx: ReducerEventContext, x: number, y: number) => void) {
-    this.connection.onReducer("update_position", callback);
+  onStartBattle(callback: (ctx: ReducerEventContext) => void) {
+    this.connection.onReducer("start_battle", callback);
   }
 
-  removeOnUpdatePosition(callback: (ctx: ReducerEventContext, x: number, y: number) => void) {
-    this.connection.offReducer("update_position", callback);
+  removeOnStartBattle(callback: (ctx: ReducerEventContext) => void) {
+    this.connection.offReducer("start_battle", callback);
   }
 
 }
 
 export class SetReducerFlags {
+  buyCrewFlags: __CallReducerFlags = 'FullUpdate';
+  buyCrew(flags: __CallReducerFlags) {
+    this.buyCrewFlags = flags;
+  }
+
+  moveCrewFlags: __CallReducerFlags = 'FullUpdate';
+  moveCrew(flags: __CallReducerFlags) {
+    this.moveCrewFlags = flags;
+  }
+
+  refreshShopFlags: __CallReducerFlags = 'FullUpdate';
+  refreshShop(flags: __CallReducerFlags) {
+    this.refreshShopFlags = flags;
+  }
+
   registerPlayerFlags: __CallReducerFlags = 'FullUpdate';
   registerPlayer(flags: __CallReducerFlags) {
     this.registerPlayerFlags = flags;
   }
 
-  updatePositionFlags: __CallReducerFlags = 'FullUpdate';
-  updatePosition(flags: __CallReducerFlags) {
-    this.updatePositionFlags = flags;
+  startBattleFlags: __CallReducerFlags = 'FullUpdate';
+  startBattle(flags: __CallReducerFlags) {
+    this.startBattleFlags = flags;
   }
 
 }
@@ -181,9 +304,24 @@ export class SetReducerFlags {
 export class RemoteTables {
   constructor(private connection: __DbConnectionImpl) {}
 
+  get battle(): BattleTableHandle {
+    // clientCache is a private property
+    return new BattleTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Battle>(REMOTE_MODULE.tables.battle));
+  }
+
+  get crew(): CrewTableHandle {
+    // clientCache is a private property
+    return new CrewTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Crew>(REMOTE_MODULE.tables.crew));
+  }
+
   get player(): PlayerTableHandle {
     // clientCache is a private property
     return new PlayerTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Player>(REMOTE_MODULE.tables.player));
+  }
+
+  get shopCrew(): ShopCrewTableHandle {
+    // clientCache is a private property
+    return new ShopCrewTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<ShopCrew>(REMOTE_MODULE.tables.shop_crew));
   }
 }
 
