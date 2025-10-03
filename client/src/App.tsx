@@ -7,8 +7,8 @@ const App: React.FC = () => {
 
   if (!isAuthenticated) {
     return (
-      
-        Battle with Friends
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+        <h1>Battle with Friends</h1>
         <button
           onClick={() => signinRedirect()}
           style={{
@@ -22,12 +22,12 @@ const App: React.FC = () => {
           }}
         >
           Login to Play
-
-      
+        </button>
+      </div>
     );
   }
 
-  return ;
+  return <GameWrapper />;
 };
 
 export default App;
