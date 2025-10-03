@@ -16,7 +16,9 @@ const oidcConfig = {
 };
 
 function onSigninCallback() {
-  window.history.replaceState({}, document.title, window.location.pathname);
+  // Remove query params and redirect back to root
+  const basePath = import.meta.env.BASE_URL || '/';
+  window.history.replaceState({}, document.title, basePath);
 }
 
 // Wrapper component that initializes SpacetimeDB after auth
