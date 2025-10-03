@@ -9,7 +9,7 @@ import App from './App';
 const oidcConfig = {
   authority: 'https://auth.spacetimedb.com/oidc',
   client_id: 'client_031CSnBZhPFgz5oj5Alo0a',
-  redirect_uri: `${window.location.origin}/callback`,
+  redirect_uri: `${window.location.origin}${import.meta.env.BASE_URL}callback`,
   scope: 'openid profile email',
   response_type: 'code',
   automaticSilentRenew: true,
