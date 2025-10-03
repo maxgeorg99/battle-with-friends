@@ -4,20 +4,21 @@ import MainScene from './scenes/MainScene';
 import { GameBridge } from './GameBridge';
 
 interface PhaserGameProps {
-  gameBridge: GameBridge;
-  playerIdentity: string;
+  bridge: GameBridge;
 }
 
-const PhaserGame: React.FC = ({ gameBridge, playerIdentity }) => {
-  const gameRef = useRef(null);
+const PhaserGame: React.FC<PhaserGameProps> = ({ bridge }) => {
+  const gameRef = useRef<Phaser.Game | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!gameRef.current) {
+    if (!gameRef.current && containerRef.current) {
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
         width: 800,
         height: 600,
-        parent: 'root',
+        parent: containerRef.current,
+        backgroundColor: '#1a1a1a',
         physics: {
           default: 'arcade',
           arcade: {
@@ -29,10 +30,9 @@ const PhaserGame: React.FC = ({ gameBridge, playerIdentity }) => {
       };
 
       gameRef.current = new Phaser.Game(config);
-      
+
       // Pass bridge to Phaser
-      gameRef.current.registry.set('gameBridge', gameBridge);
-      gameRef.current.registry.set('playerIdentity', playerIdentity);
+      gameRef.current.registry.set('gameBridge', bridge);
     }
 
     return () => {
@@ -41,9 +41,21 @@ const PhaserGame: React.FC = ({ gameBridge, playerIdentity }) => {
         gameRef.current = null;
       }
     };
-  }, [gameBridge, playerIdentity]);
+  }, [bridge]);
 
-  return null;
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: '#1a1a1a'
+      }}
+    />
+  );
 };
 
 export default PhaserGame;

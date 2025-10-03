@@ -56,9 +56,11 @@ const GameWrapper: React.FC = () => {
     }
   }, [conn, gameBridge]);
 
-  return (
-    <PhaserGame bridge={gameBridge} />
-  );
+  if (!conn?.identity) {
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'white' }}>Connecting to game server...</div>;
+  }
+
+  return <PhaserGame bridge={gameBridge} />;
 };
 
 export default GameWrapper;
