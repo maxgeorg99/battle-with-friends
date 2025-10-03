@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useAuth } from 'react-oidc-context';
+import { jwtDecode } from 'jwt-decode';
 import { useSpacetimeDB } from './SpacetimeDBProvider';
 import { Player } from '../autobindings';
 import PhaserGame from '../game/PhaserGame';
@@ -12,13 +13,28 @@ const GameWrapper: React.FC = () => {
   const [gameBridge] = useState(() => new GameBridge());
   const [registered, setRegistered] = useState(false);
 
+  // Extract username from JWT token
+  const username = useMemo(() => {
+    if (!auth.user?.access_token) return 'Player';
+
+    try {
+      const decoded: any = jwtDecode(auth.user.access_token);
+      // Try common JWT claims for username
+      return decoded.preferred_username || decoded.name || decoded.email || decoded.sub || 'Player';
+    } catch (e) {
+      console.error('Failed to decode JWT:', e);
+      return 'Player';
+    }
+  }, [auth.user?.access_token]);
+
   // Register player once connected
   useEffect(() => {
-    if (conn && !registered && auth.user?.profile?.name) {
-      conn.reducers.registerPlayer(auth.user.profile.name as string);
+    if (conn && !registered && username) {
+      console.log('Registering player with username:', username);
+      conn.reducers.registerPlayer(username);
       setRegistered(true);
     }
-  }, [conn, registered, auth.user?.profile?.name]);
+  }, [conn, registered, username]);
 
   // Subscribe to player table updates
   useEffect(() => {

@@ -9,25 +9,38 @@ import App from './App';
 const oidcConfig = {
   authority: 'https://auth.spacetimedb.com/oidc',
   client_id: 'client_031CSnBZhPFgz5oj5Alo0a',
-  redirect_uri: `${window.location.origin}${import.meta.env.BASE_URL}callback`,
+  redirect_uri: `${window.location.origin}${import.meta.env.BASE_URL}`,
   scope: 'openid profile email',
   response_type: 'code',
   automaticSilentRenew: true,
 };
 
 function onSigninCallback() {
-  // Remove query params and redirect back to root
-  const basePath = import.meta.env.BASE_URL || '/';
-  window.history.replaceState({}, document.title, basePath);
+  // Clean up URL after OAuth callback
+  window.history.replaceState(
+    {},
+    document.title,
+    window.location.pathname
+  );
 }
 
 // Wrapper component that initializes SpacetimeDB after auth
 function AppWithSpacetime() {
   const auth = useAuth();
 
+  useEffect(() => {
+    console.log('🔐 Auth state:', {
+      isLoading: auth.isLoading,
+      isAuthenticated: auth.isAuthenticated,
+      hasUser: !!auth.user,
+      hasToken: !!auth.user?.access_token,
+      error: auth.error?.message,
+    });
+  }, [auth.isLoading, auth.isAuthenticated, auth.user, auth.error]);
+
   // Wait for authentication
   if (auth.isLoading) {
-    return <div>Loading authentication...</div>;
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'white' }}>Loading authentication...</div>;
   }
 
   // If not authenticated, show App (which will show login button)

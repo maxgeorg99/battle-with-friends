@@ -34,9 +34,6 @@ jobs:
           # Set base path for GitHub Pages (replace with your repo name)
           VITE_BASE_PATH: /battle-with-friends/
 
-      - name: Copy 404.html for SPA routing
-        run: cp client/public/404.html client/dist/404.html
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
