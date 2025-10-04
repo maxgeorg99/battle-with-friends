@@ -1,4 +1,4 @@
-use spacetimedb::{ReducerContext, Identity, Table, SpacetimeType, Timestamp};
+use spacetimedb::{ReducerContext, Identity, Table, SpacetimeType, Timestamp, rand::Rng};
 
 // ========== ENUMS ==========
 
@@ -113,7 +113,7 @@ pub fn register_player(ctx: &ReducerContext, name: String) -> Result<(), String>
     ctx.db.player().insert(Player {
         identity,
         name,
-        berries: 100,
+        berries: 1000000, // Start with 1,000,000 berries
         bounty: 0,
         wins: 0,
         losses: 0,
@@ -152,43 +152,41 @@ pub fn refresh_shop(ctx: &ReducerContext) -> Result<(), String> {
         ctx.db.shop_crew().id().delete(shop_crew.id);
     }
 
-    // Crew templates (name, rarity, trait1, trait2, hp, attack, defense, cost)
+    // Crew templates (name, rarity, trait1, trait2, hp, attack, defense, cost in 100k berries)
     let crew_pool: Vec<(&str, CrewRarity, CrewTrait, Option<CrewTrait>, u32, u32, u32, u32)> = vec![
         // Straw Hats
-        ("Roronoa Zoro", CrewRarity::Rare, CrewTrait::StrawHat, None, 80, 20, 8, 3),
-        ("Nami", CrewRarity::Common, CrewTrait::StrawHat, None, 50, 12, 6, 2),
-        ("Usopp", CrewRarity::Common, CrewTrait::StrawHat, None, 60, 15, 5, 2),
-        ("Sanji", CrewRarity::Rare, CrewTrait::StrawHat, None, 75, 18, 10, 3),
-        ("Tony Tony Chopper", CrewRarity::Common, CrewTrait::StrawHat, Some(CrewTrait::DFUser), 55, 10, 12, 3),
-        ("Nico Robin", CrewRarity::Epic, CrewTrait::StrawHat, Some(CrewTrait::DFUser), 70, 22, 8, 4),
-        ("Franky", CrewRarity::Rare, CrewTrait::StrawHat, None, 85, 19, 15, 3),
-        ("Brook", CrewRarity::Rare, CrewTrait::StrawHat, Some(CrewTrait::DFUser), 65, 17, 7, 3),
+        ("Roronoa Zoro", CrewRarity::Rare, CrewTrait::StrawHat, None, 80, 20, 8, 300000),
+        ("Nami", CrewRarity::Common, CrewTrait::StrawHat, None, 50, 12, 6, 200000),
+        ("Usopp", CrewRarity::Common, CrewTrait::StrawHat, None, 60, 15, 5, 200000),
+        ("Sanji", CrewRarity::Rare, CrewTrait::StrawHat, None, 75, 18, 10, 300000),
+        ("Tony Tony Chopper", CrewRarity::Common, CrewTrait::StrawHat, Some(CrewTrait::DFUser), 55, 10, 12, 300000),
+        ("Nico Robin", CrewRarity::Epic, CrewTrait::StrawHat, Some(CrewTrait::DFUser), 70, 22, 8, 400000),
+        ("Franky", CrewRarity::Rare, CrewTrait::StrawHat, None, 85, 19, 15, 300000),
+        ("Brook", CrewRarity::Rare, CrewTrait::StrawHat, Some(CrewTrait::DFUser), 65, 17, 7, 300000),
 
         // Marines
-        ("Marine Soldier", CrewRarity::Common, CrewTrait::Marine, None, 50, 10, 8, 1),
-        ("Smoker", CrewRarity::Epic, CrewTrait::Marine, Some(CrewTrait::DFUser), 90, 22, 12, 5),
-        ("Tashigi", CrewRarity::Rare, CrewTrait::Marine, None, 70, 16, 9, 3),
+        ("Marine Soldier", CrewRarity::Common, CrewTrait::Marine, None, 50, 10, 8, 100000),
+        ("Smoker", CrewRarity::Epic, CrewTrait::Marine, Some(CrewTrait::DFUser), 90, 22, 12, 500000),
+        ("Tashigi", CrewRarity::Rare, CrewTrait::Marine, None, 70, 16, 9, 300000),
 
         // Supernovas
-        ("Trafalgar Law", CrewRarity::Epic, CrewTrait::Supernova, Some(CrewTrait::DFUser), 85, 24, 10, 5),
-        ("Eustass Kid", CrewRarity::Epic, CrewTrait::Supernova, Some(CrewTrait::DFUser), 95, 26, 8, 5),
-        ("Killer", CrewRarity::Rare, CrewTrait::Supernova, None, 75, 20, 9, 3),
+        ("Trafalgar Law", CrewRarity::Epic, CrewTrait::Supernova, Some(CrewTrait::DFUser), 85, 24, 10, 500000),
+        ("Eustass Kid", CrewRarity::Epic, CrewTrait::Supernova, Some(CrewTrait::DFUser), 95, 26, 8, 500000),
+        ("Killer", CrewRarity::Rare, CrewTrait::Supernova, None, 75, 20, 9, 300000),
 
         // Warlords
-        ("Dracule Mihawk", CrewRarity::Legendary, CrewTrait::Warlord, None, 120, 35, 15, 7),
-        ("Boa Hancock", CrewRarity::Epic, CrewTrait::Warlord, Some(CrewTrait::DFUser), 85, 25, 12, 5),
+        ("Dracule Mihawk", CrewRarity::Legendary, CrewTrait::Warlord, None, 120, 35, 15, 700000),
+        ("Boa Hancock", CrewRarity::Epic, CrewTrait::Warlord, Some(CrewTrait::DFUser), 85, 25, 12, 500000),
 
         // Emperors
-        ("Shanks", CrewRarity::Legendary, CrewTrait::Emperor, None, 150, 40, 20, 8),
-        ("Charlotte Katakuri", CrewRarity::Epic, CrewTrait::Emperor, Some(CrewTrait::DFUser), 100, 28, 18, 6),
+        ("Shanks", CrewRarity::Legendary, CrewTrait::Emperor, None, 150, 40, 20, 800000),
+        ("Charlotte Katakuri", CrewRarity::Epic, CrewTrait::Emperor, Some(CrewTrait::DFUser), 100, 28, 18, 600000),
     ];
-
-    // Simple pseudorandom using timestamp
-    let seed = ctx.timestamp.micros_since_unix_epoch;
 
     // Generate 5 random crew from pool
     for i in 0..5 {
-        let index = ((seed + i as u64 * 7919) % crew_pool.len() as u64) as usize;
+        let mut rng = ctx.rng();
+        let index = rng.gen_range(0..crew_pool.len());
         let template = crew_pool[index];
 
         ctx.db.shop_crew().insert(ShopCrew {

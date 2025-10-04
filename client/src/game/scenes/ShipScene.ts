@@ -16,6 +16,7 @@ export default class ShipScene extends Phaser.Scene {
   private bountyText!: Phaser.GameObjects.Text;
   private shipTypeText!: Phaser.GameObjects.Text;
   private shopContainer!: Phaser.GameObjects.Container;
+  private statsTooltip!: Phaser.GameObjects.Container;
 
   constructor() {
     super('ShipScene');
@@ -96,6 +97,9 @@ export default class ShipScene extends Phaser.Scene {
 
     // Create ship grid
     this.createShipGrid();
+
+    // Create stats tooltip (initially hidden)
+    this.createStatsTooltip();
 
     // Subscribe to SpacetimeDB updates
     this.subscribeToDatabase();
@@ -319,6 +323,15 @@ export default class ShipScene extends Phaser.Scene {
       originalPosition: { x: container.x, y: container.y },
     };
     entity.addComponent(ComponentTypes.DRAGGABLE, draggable);
+
+    // Add hover events to show stats tooltip
+    container.on('pointerover', () => {
+      this.showStatsTooltip(crew, container.x, container.y);
+    });
+
+    container.on('pointerout', () => {
+      this.hideStatsTooltip();
+    });
   }
 
   private createCrewCard(crew: any, isShopCard: boolean): Phaser.GameObjects.Container {
@@ -366,25 +379,39 @@ export default class ShipScene extends Phaser.Scene {
       }
 
       // Crew name at bottom
-      const nameText = this.add.text(0, 45, crew.name.toUpperCase(), {
-        fontSize: '14px',
+      const nameText = this.add.text(0, 32, crew.name.toUpperCase(), {
+        fontSize: '12px',
         color: '#3d2817',
         fontFamily: 'Georgia, serif',
         fontStyle: 'bold',
         align: 'center',
+        wordWrap: { width: 100 },
       }).setOrigin(0.5);
       container.add(nameText);
 
-      // Cost at bottom with coin icon
-      const costBg = this.add.circle(0, 65, 12, 0xffd700)
-        .setStrokeStyle(2, 0x3d2817);
-      container.add(costBg);
+      // Traits display
+      const trait1Name = this.getTraitDisplayName(crew.trait1);
+      const trait2Name = crew.trait2 ? this.getTraitDisplayName(crew.trait2) : null;
 
-      const costText = this.add.text(0, 65, `${crew.cost || 1}`, {
-        fontSize: '14px',
+      const traitsText = trait2Name ? `${trait1Name} • ${trait2Name}` : trait1Name;
+      const traits = this.add.text(0, 50, traitsText, {
+        fontSize: '9px',
+        color: '#654321',
+        fontFamily: 'Georgia, serif',
+        align: 'center',
+        wordWrap: { width: 100 },
+      }).setOrigin(0.5);
+      container.add(traits);
+
+      // Cost at bottom with formatted berries
+      const formattedCost = this.formatBerries(crew.cost || 100000);
+      const costText = this.add.text(0, 65, `₿${formattedCost}`, {
+        fontSize: '12px',
         color: '#3d2817',
         fontFamily: 'Georgia, serif',
         fontStyle: 'bold',
+        backgroundColor: '#ffd700',
+        padding: { x: 6, y: 2 },
       }).setOrigin(0.5);
       container.add(costText);
     } else {
@@ -497,5 +524,152 @@ export default class ShipScene extends Phaser.Scene {
   private startBattle() {
     this.connection.reducers.startBattle();
     // TODO: Switch to battle scene
+  }
+
+  private getTraitDisplayName(trait: string): string {
+    const traitMap: Record<string, string> = {
+      'StrawHat': 'Straw Hat',
+      'Marine': 'Marine',
+      'Revolutionary': 'Revolutionary',
+      'Warlord': 'Warlord',
+      'Emperor': 'Emperor',
+      'Supernova': 'Supernova',
+      'DFUser': 'DF User',
+    };
+    return traitMap[trait] || trait;
+  }
+
+  private formatBerries(amount: number): string {
+    if (amount >= 1000000) {
+      return `${(amount / 1000000).toFixed(1)}M`;
+    } else if (amount >= 1000) {
+      return `${(amount / 1000).toFixed(0)}K`;
+    }
+    return amount.toString();
+  }
+
+  private createStatsTooltip() {
+    this.statsTooltip = this.add.container(0, 0);
+    this.statsTooltip.setDepth(10000); // Always on top
+    this.statsTooltip.setVisible(false);
+  }
+
+  private showStatsTooltip(crew: any, x: number, y: number) {
+    // Clear previous tooltip content
+    this.statsTooltip.removeAll(true);
+
+    const tooltipWidth = 200;
+    const tooltipHeight = 140;
+
+    // Position tooltip to the right of the unit, or left if too close to edge
+    const tooltipX = x + 80 > 1024 - tooltipWidth ? x - 80 : x + 80;
+    const tooltipY = y;
+
+    // Background
+    const bg = this.add.rectangle(0, 0, tooltipWidth, tooltipHeight, 0x2c2416, 0.95)
+      .setStrokeStyle(3, 0xd4b896);
+    this.statsTooltip.add(bg);
+
+    // Crew name
+    const nameText = this.add.text(0, -55, crew.name, {
+      fontSize: '14px',
+      color: '#ffd700',
+      fontFamily: 'Georgia, serif',
+      fontStyle: 'bold',
+      align: 'center',
+      wordWrap: { width: tooltipWidth - 20 },
+    }).setOrigin(0.5);
+    this.statsTooltip.add(nameText);
+
+    // Rarity
+    const rarityText = this.add.text(0, -40, crew.rarity, {
+      fontSize: '11px',
+      color: '#d4b896',
+      fontFamily: 'Georgia, serif',
+      align: 'center',
+    }).setOrigin(0.5);
+    this.statsTooltip.add(rarityText);
+
+    // Traits
+    const trait1Name = this.getTraitDisplayName(crew.trait1);
+    const trait2Name = crew.trait2 ? this.getTraitDisplayName(crew.trait2) : null;
+    const traitsText = trait2Name ? `${trait1Name} • ${trait2Name}` : trait1Name;
+
+    const traits = this.add.text(0, -25, traitsText, {
+      fontSize: '10px',
+      color: '#87ceeb',
+      fontFamily: 'Georgia, serif',
+      align: 'center',
+      wordWrap: { width: tooltipWidth - 20 },
+    }).setOrigin(0.5);
+    this.statsTooltip.add(traits);
+
+    // Stats
+    const statsY = -5;
+    const lineHeight = 16;
+
+    const hpText = this.add.text(-80, statsY, `HP:`, {
+      fontSize: '11px',
+      color: '#d4b896',
+      fontFamily: 'Georgia, serif',
+    });
+    this.statsTooltip.add(hpText);
+
+    const hpValue = this.add.text(80, statsY, `${crew.currentHp || crew.maxHp}/${crew.maxHp}`, {
+      fontSize: '11px',
+      color: '#fff',
+      fontFamily: 'Georgia, serif',
+    }).setOrigin(1, 0);
+    this.statsTooltip.add(hpValue);
+
+    const atkText = this.add.text(-80, statsY + lineHeight, `Attack:`, {
+      fontSize: '11px',
+      color: '#d4b896',
+      fontFamily: 'Georgia, serif',
+    });
+    this.statsTooltip.add(atkText);
+
+    const atkValue = this.add.text(80, statsY + lineHeight, `${crew.attack}`, {
+      fontSize: '11px',
+      color: '#fff',
+      fontFamily: 'Georgia, serif',
+    }).setOrigin(1, 0);
+    this.statsTooltip.add(atkValue);
+
+    const defText = this.add.text(-80, statsY + lineHeight * 2, `Defense:`, {
+      fontSize: '11px',
+      color: '#d4b896',
+      fontFamily: 'Georgia, serif',
+    });
+    this.statsTooltip.add(defText);
+
+    const defValue = this.add.text(80, statsY + lineHeight * 2, `${crew.defense}`, {
+      fontSize: '11px',
+      color: '#fff',
+      fontFamily: 'Georgia, serif',
+    }).setOrigin(1, 0);
+    this.statsTooltip.add(defValue);
+
+    const levelText = this.add.text(-80, statsY + lineHeight * 3, `Level:`, {
+      fontSize: '11px',
+      color: '#d4b896',
+      fontFamily: 'Georgia, serif',
+    });
+    this.statsTooltip.add(levelText);
+
+    const levelValue = this.add.text(80, statsY + lineHeight * 3, `${crew.level || 1}`, {
+      fontSize: '11px',
+      color: '#fff',
+      fontFamily: 'Georgia, serif',
+    }).setOrigin(1, 0);
+    this.statsTooltip.add(levelValue);
+
+    // Position and show
+    this.statsTooltip.setPosition(tooltipX, tooltipY);
+    this.statsTooltip.setVisible(true);
+  }
+
+  private hideStatsTooltip() {
+    this.statsTooltip.setVisible(false);
   }
 }
