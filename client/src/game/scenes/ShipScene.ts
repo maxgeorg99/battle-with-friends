@@ -116,11 +116,22 @@ export default class ShipScene extends Phaser.Scene {
   }
 
   private createUI() {
-    // RECRUIT banner at top
-    const recruitBanner = this.add.rectangle(512, 75, 450, 65, 0xd4b896)
+    // Ship grid label (RAFT) at top
+    const raftLabel = this.add.rectangle(512, 80, 200, 60, 0xd4b896)
+      .setStrokeStyle(3, 0x3d2817);
+
+    this.add.text(512, 80, 'RAFT', {
+      fontSize: '32px',
+      color: '#3d2817',
+      fontFamily: 'Georgia, serif',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+
+    // RECRUIT banner below ship grid
+    const recruitBanner = this.add.rectangle(512, 450, 450, 65, 0xd4b896)
       .setStrokeStyle(4, 0x3d2817);
 
-    this.add.text(512, 75, 'RECRUIT', {
+    this.add.text(512, 450, 'RECRUIT', {
       fontSize: '40px',
       color: '#3d2817',
       fontFamily: 'Georgia, serif',
@@ -128,17 +139,6 @@ export default class ShipScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     this.shopContainer = this.add.container(0, 0);
-
-    // Ship grid label (RAFT)
-    const raftLabel = this.add.rectangle(512, 500, 200, 60, 0xd4b896)
-      .setStrokeStyle(3, 0x3d2817);
-
-    this.add.text(512, 500, 'RAFT', {
-      fontSize: '32px',
-      color: '#3d2817',
-      fontFamily: 'Georgia, serif',
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
 
     // Bottom left - Level/Round indicator
     const levelBg = this.add.circle(105, 680, 50, 0xd4b896)
@@ -154,56 +154,14 @@ export default class ShipScene extends Phaser.Scene {
     const berriesIcon = this.add.circle(105, 705, 15, 0xffd700)
       .setStrokeStyle(3, 0x3d2817);
 
-    // Treasure Island button (bottom left)
-    const treasureBg = this.add.rectangle(105, 555, 170, 140, 0xd4b896)
-      .setStrokeStyle(4, 0x3d2817);
-    treasureBg.setInteractive(new Phaser.Geom.Rectangle(-85, -70, 170, 140), Phaser.Geom.Rectangle.Contains);
-    treasureBg.input!.cursor = 'pointer';
-
-    this.add.text(105, 515, 'TREASURE', {
-      fontSize: '18px',
-      color: '#3d2817',
-      fontFamily: 'Georgia, serif',
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
-
-    this.add.text(105, 540, 'ISLAND', {
-      fontSize: '18px',
-      color: '#3d2817',
-      fontFamily: 'Georgia, serif',
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
-
-    // Placeholder treasure icon
-    this.add.rectangle(105, 575, 60, 60, 0x8b6f47)
-      .setStrokeStyle(2, 0x3d2817);
-
-    this.add.text(105, 605, '1400', {
-      fontSize: '28px',
-      color: '#3d2817',
-      fontFamily: 'Georgia, serif',
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
-
-    // Bottom right - Round counter
-    const roundBg = this.add.circle(920, 680, 40, 0xd4b896)
-      .setStrokeStyle(4, 0x3d2817);
-
-    this.add.text(920, 680, '17', {
-      fontSize: '36px',
-      color: '#3d2817',
-      fontFamily: 'Georgia, serif',
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
-
     // Bottom right - Refresh button
-    const refreshBg = this.add.rectangle(895, 600, 200, 60, 0xd4b896)
+    const refreshBg = this.add.rectangle(895, 680, 200, 60, 0xd4b896)
       .setStrokeStyle(4, 0x3d2817);
     refreshBg.setInteractive(new Phaser.Geom.Rectangle(-100, -30, 200, 60), Phaser.Geom.Rectangle.Contains);
     refreshBg.input!.cursor = 'pointer';
     refreshBg.on('pointerdown', () => this.refreshShop());
 
-    this.add.text(895, 600, 'REFRESH', {
+    this.add.text(895, 680, 'REFRESH', {
       fontSize: '24px',
       color: '#3d2817',
       fontFamily: 'Georgia, serif',
@@ -217,18 +175,22 @@ export default class ShipScene extends Phaser.Scene {
   }
 
   private createShipGrid() {
-    const gridX = 232;
-    const gridY = 580;
-    const cellSize = 56;
+    const gridStartX = 332;  // Centered for 5 columns
+    const gridStartY = 180;  // Below RAFT label
+    const cellSize = 64;
+    const cols = 5;
+    const rows = 3;
 
-    // Draw ship grid (10 slots in a row) - wooden deck style
-    for (let i = 0; i < 10; i++) {
-      const x = gridX + i * cellSize;
-      const y = gridY;
+    // Draw ship grid (3x5 grid) - wooden deck style
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x = gridStartX + col * cellSize;
+        const y = gridStartY + row * cellSize;
 
-      // Grid cell background - wooden planks
-      this.add.rectangle(x, y, cellSize - 2, cellSize - 2, 0xa0826d)
-        .setStrokeStyle(3, 0x654321);
+        // Grid cell background - wooden planks
+        this.add.rectangle(x, y, cellSize - 2, cellSize - 2, 0xa0826d)
+          .setStrokeStyle(3, 0x654321);
+      }
     }
   }
 
@@ -263,13 +225,13 @@ export default class ShipScene extends Phaser.Scene {
 
     // Subscribe to shop updates
     this.connection.db.shopCrew.onInsert((shopCrew) => {
-      if (this.localIdentity && shopCrew.player.isEqual(this.localIdentity)) {
+      if (this.localIdentity && shopCrew.player && shopCrew.player.isEqual(this.localIdentity)) {
         this.addShopCrewCard(shopCrew);
       }
     });
 
     this.connection.db.shopCrew.onDelete((shopCrew) => {
-      if (this.localIdentity && shopCrew.player.isEqual(this.localIdentity)) {
+      if (this.localIdentity && shopCrew.player && shopCrew.player.isEqual(this.localIdentity)) {
         this.removeShopCrewCard(shopCrew.id);
       }
     });
@@ -301,7 +263,7 @@ export default class ShipScene extends Phaser.Scene {
     if (!this.connection || !this.localIdentity) return;
 
     const shopList = Array.from(this.connection.db.shopCrew.iter())
-      .filter(s => s.player.isEqual(this.localIdentity));
+      .filter(s => s.player && s.player.isEqual(this.localIdentity));
 
     for (const shopCrew of shopList) {
       this.addShopCrewCard(shopCrew);
@@ -451,12 +413,12 @@ export default class ShipScene extends Phaser.Scene {
     // Create shop card
     const card = this.createCrewCard(shopCrew, true);
 
-    // Position in shop - centered horizontally with spacing
+    // Position in shop - below grid, centered horizontally with spacing
     const shopIndex = this.shopContainer.list.length;
     const cardSpacing = 125;
     const startX = 290; // Start position for first card
     const x = startX + shopIndex * cardSpacing;
-    card.setPosition(x, 150);
+    card.setPosition(x, 550); // Below the RECRUIT banner
 
     // Make clickable to buy
     card.setSize(110, 140);
@@ -495,12 +457,12 @@ export default class ShipScene extends Phaser.Scene {
   }
 
   private gridToScreen(gridX: number, gridY: number): { x: number; y: number } {
-    const gridOffsetX = 232;
-    const gridOffsetY = 580;
-    const cellSize = 56;
+    const gridStartX = 332;
+    const gridStartY = 180;
+    const cellSize = 64;
     return {
-      x: gridOffsetX + gridX * cellSize,
-      y: gridOffsetY + gridY * cellSize,
+      x: gridStartX + gridX * cellSize,
+      y: gridStartY + gridY * cellSize,
     };
   }
 

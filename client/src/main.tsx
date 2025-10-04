@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { AuthProvider, useAuth } from 'react-oidc-context';
 import { SpacetimeDBProvider } from './components/SpacetimeDBProvider';
@@ -27,6 +27,8 @@ function onSigninCallback() {
 // Wrapper component that initializes SpacetimeDB after auth
 function AppWithSpacetime() {
   const auth = useAuth();
+  const [connection, setConnection] = React.useState<DbConnection | null>(null);
+  const [username, setUsername] = React.useState<string>('Player');
 
   useEffect(() => {
     console.log('🔐 Auth state:', {
@@ -38,6 +40,82 @@ function AppWithSpacetime() {
     });
   }, [auth.isLoading, auth.isAuthenticated, auth.user, auth.error]);
 
+  // Listen for token renewal and reconnect
+  useEffect(() => {
+    const handleUserLoaded = (user: any) => {
+      console.log('🔄 Token refreshed, reconnecting to SpacetimeDB...');
+      if (connection) {
+        connection.disconnect();
+      }
+      // Trigger reconnection by setting connection to null
+      setConnection(null);
+    };
+
+    auth.events.addUserLoaded(handleUserLoaded);
+
+    return () => {
+      auth.events.removeUserLoaded(handleUserLoaded);
+    };
+  }, [auth.events, connection]);
+
+  // Initialize/reinitialize SpacetimeDB connection when token changes
+  useEffect(() => {
+    if (!auth.isAuthenticated || !auth.user?.access_token) {
+      return;
+    }
+
+    // Extract username from JWT token
+    const getUsername = () => {
+      try {
+        const decoded: any = auth.user?.profile || {};
+        return decoded.preferred_username || decoded.name || decoded.email || decoded.sub || 'Player';
+      } catch (e) {
+        console.error('Failed to get username:', e);
+        return 'Player';
+      }
+    };
+
+    const currentUsername = getUsername();
+    setUsername(currentUsername);
+
+    console.log('🔌 Creating SpacetimeDB connection with token');
+
+    const spacetimeConfig = getSpacetimeConfig();
+    const newConnection = DbConnection.builder()
+      .withUri(spacetimeConfig.uri)
+      .withModuleName(spacetimeConfig.moduleName)
+      .withToken(auth.user.access_token)
+      .onConnect((conn, identity, token) => {
+        console.log('✅ Connected to SpacetimeDB', {
+          identity: identity.toHexString(),
+          username: currentUsername
+        });
+        localStorage.setItem(spacetimeConfig.tokenKey, token);
+
+        // Subscribe to all tables
+        console.log('📡 Subscribing to SpacetimeDB tables...');
+        conn.subscriptionBuilder()
+            .subscribeToAllTables();
+
+        // Register player immediately after connection is established
+        console.log('Registering player with username:', currentUsername);
+        conn.reducers.registerPlayer(currentUsername);
+      })
+      .onConnectError((error) => {
+        console.error('❌ Failed to connect to SpacetimeDB:', error);
+      })
+      .build();
+
+    setConnection(newConnection);
+
+    return () => {
+      if (newConnection) {
+        console.log('🔌 Disconnecting from SpacetimeDB');
+        newConnection.disconnect();
+      }
+    };
+  }, [auth.user?.access_token, auth.isAuthenticated]);
+
   // Wait for authentication
   if (auth.isLoading) {
     return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'white' }}>Loading authentication...</div>;
@@ -48,44 +126,10 @@ function AppWithSpacetime() {
     return <App />;
   }
 
-  // Extract username from JWT token
-  const getUsername = () => {
-    try {
-      const decoded: any = auth.user?.profile || {};
-      return decoded.preferred_username || decoded.name || decoded.email || decoded.sub || 'Player';
-    } catch (e) {
-      console.error('Failed to get username:', e);
-      return 'Player';
-    }
-  };
-
-  const username = getUsername();
-
-  // Initialize SpacetimeDB connection with auth token
-  const spacetimeConfig = getSpacetimeConfig();
-  const connection = DbConnection.builder()
-    .withUri(spacetimeConfig.uri)
-    .withModuleName(spacetimeConfig.moduleName)
-    .withToken(auth.user.access_token)
-    .onConnect((conn, identity, token) => {
-      console.log('✅ Connected to SpacetimeDB', {
-        identity: identity.toHexString(),
-        username
-      });
-      localStorage.setItem(spacetimeConfig.tokenKey, token);
-
-      // Subscribe to all tables
-      console.log('📡 Subscribing to SpacetimeDB tables...');
-      conn.subscriptionBuilder()
-          .subscribeToAllTables();
-      // Register player immediately after connection is established
-      console.log('Registering player with username:', username);
-      conn.reducers.registerPlayer(username);
-    })
-    .onConnectError((error) => {
-      console.error('❌ Failed to connect to SpacetimeDB:', error);
-    })
-    .build();
+  // Wait for connection to be established
+  if (!connection) {
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'white' }}>Connecting to game server...</div>;
+  }
 
   return (
     <SpacetimeDBProvider connection={connection}>

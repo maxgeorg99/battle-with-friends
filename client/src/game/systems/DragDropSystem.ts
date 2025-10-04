@@ -3,9 +3,9 @@ import { ComponentTypes, Draggable, Sprite, GridPosition } from '../ecs/Componen
 
 export class DragDropSystem implements System {
   private scene: Phaser.Scene;
-  private gridCellSize = 56;
-  private shipGridOffsetX = 232;
-  private shipGridOffsetY = 580;
+  private gridCellSize = 64;
+  private shipGridOffsetX = 332;
+  private shipGridOffsetY = 180;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -98,20 +98,20 @@ export class DragDropSystem implements System {
   }
 
   private screenToGrid(screenX: number, screenY: number): GridPosition {
-    const x = Math.floor((screenX - this.shipGridOffsetX) / this.gridCellSize);
-    const y = Math.floor((screenY - this.shipGridOffsetY) / this.gridCellSize);
+    const x = Math.round((screenX - this.shipGridOffsetX) / this.gridCellSize);
+    const y = Math.round((screenY - this.shipGridOffsetY) / this.gridCellSize);
     return { x, y, width: 1, height: 1 };
   }
 
   private gridToScreen(gridX: number, gridY: number): { x: number; y: number } {
     return {
-      x: this.shipGridOffsetX + gridX * this.gridCellSize + this.gridCellSize / 2,
-      y: this.shipGridOffsetY + gridY * this.gridCellSize + this.gridCellSize / 2,
+      x: this.shipGridOffsetX + gridX * this.gridCellSize,
+      y: this.shipGridOffsetY + gridY * this.gridCellSize,
     };
   }
 
   private isValidGridPosition(pos: GridPosition): boolean {
-    // Ship has 10 slots (0-9) in a single row
-    return pos.x >= 0 && pos.x <= 9 && pos.y === 0;
+    // Ship has 3x5 grid (5 columns, 3 rows)
+    return pos.x >= 0 && pos.x < 5 && pos.y >= 0 && pos.y < 3;
   }
 }

@@ -1,4 +1,4 @@
-use spacetimedb::{ReducerContext, Identity, Table, SpacetimeType};
+use spacetimedb::{ReducerContext, Identity, Table, SpacetimeType, Timestamp};
 
 // ========== ENUMS ==========
 
@@ -137,6 +137,9 @@ pub fn register_player(ctx: &ReducerContext, name: String) -> Result<(), String>
         slot_index: Some(0),
     });
 
+    // Initialize shop with random crew
+    refresh_shop(ctx)?;
+
     Ok(())
 }
 
@@ -150,26 +153,44 @@ pub fn refresh_shop(ctx: &ReducerContext) -> Result<(), String> {
     }
 
     // Crew templates (name, rarity, trait1, trait2, hp, attack, defense, cost)
-    let crew_pool = vec![
-        // Common Straw Hats
-        ("Roronoa Zoro", CrewRarity::Rare, CrewTrait::StrawHat, None, 80, 20, 8, 30),
-        ("Nami", CrewRarity::Common, CrewTrait::StrawHat, None, 50, 12, 6, 20),
-        ("Usopp", CrewRarity::Common, CrewTrait::StrawHat, None, 60, 15, 5, 20),
-        ("Sanji", CrewRarity::Rare, CrewTrait::StrawHat, None, 75, 18, 10, 35),
-        //("Tony Tony Chopper", CrewRarity::Common, CrewTrait::StrawHat, Some(CrewTrait::DFUser), 55, 10, 12, 25),
+    let crew_pool: Vec<(&str, CrewRarity, CrewTrait, Option<CrewTrait>, u32, u32, u32, u32)> = vec![
+        // Straw Hats
+        ("Roronoa Zoro", CrewRarity::Rare, CrewTrait::StrawHat, None, 80, 20, 8, 3),
+        ("Nami", CrewRarity::Common, CrewTrait::StrawHat, None, 50, 12, 6, 2),
+        ("Usopp", CrewRarity::Common, CrewTrait::StrawHat, None, 60, 15, 5, 2),
+        ("Sanji", CrewRarity::Rare, CrewTrait::StrawHat, None, 75, 18, 10, 3),
+        ("Tony Tony Chopper", CrewRarity::Common, CrewTrait::StrawHat, Some(CrewTrait::DFUser), 55, 10, 12, 3),
+        ("Nico Robin", CrewRarity::Epic, CrewTrait::StrawHat, Some(CrewTrait::DFUser), 70, 22, 8, 4),
+        ("Franky", CrewRarity::Rare, CrewTrait::StrawHat, None, 85, 19, 15, 3),
+        ("Brook", CrewRarity::Rare, CrewTrait::StrawHat, Some(CrewTrait::DFUser), 65, 17, 7, 3),
 
         // Marines
-        //("Marine Soldier", CrewRarity::Common, CrewTrait::Marine, None, 50, 10, 8, 15),
-        //("Smoker", CrewRarity::Epic, CrewTrait::Marine, Some(CrewTrait::DFUser), 90, 22, 12, 60),
+        ("Marine Soldier", CrewRarity::Common, CrewTrait::Marine, None, 50, 10, 8, 1),
+        ("Smoker", CrewRarity::Epic, CrewTrait::Marine, Some(CrewTrait::DFUser), 90, 22, 12, 5),
+        ("Tashigi", CrewRarity::Rare, CrewTrait::Marine, None, 70, 16, 9, 3),
 
-        // Others
-        //("Pirate Rookie", CrewRarity::Common, CrewTrait::Supernova, None, 45, 12, 5, 18),
-        //("Trafalgar Law", CrewRarity::Epic, CrewTrait::Supernova, Some(CrewTrait::DFUser), 85, 24, 10, 70),
+        // Supernovas
+        ("Trafalgar Law", CrewRarity::Epic, CrewTrait::Supernova, Some(CrewTrait::DFUser), 85, 24, 10, 5),
+        ("Eustass Kid", CrewRarity::Epic, CrewTrait::Supernova, Some(CrewTrait::DFUser), 95, 26, 8, 5),
+        ("Killer", CrewRarity::Rare, CrewTrait::Supernova, None, 75, 20, 9, 3),
+
+        // Warlords
+        ("Dracule Mihawk", CrewRarity::Legendary, CrewTrait::Warlord, None, 120, 35, 15, 7),
+        ("Boa Hancock", CrewRarity::Epic, CrewTrait::Warlord, Some(CrewTrait::DFUser), 85, 25, 12, 5),
+
+        // Emperors
+        ("Shanks", CrewRarity::Legendary, CrewTrait::Emperor, None, 150, 40, 20, 8),
+        ("Charlotte Katakuri", CrewRarity::Epic, CrewTrait::Emperor, Some(CrewTrait::DFUser), 100, 28, 18, 6),
     ];
+
+    // Simple pseudorandom using timestamp
+    let seed = ctx.timestamp.micros_since_unix_epoch;
 
     // Generate 5 random crew from pool
     for i in 0..5 {
-        let template = crew_pool[i % crew_pool.len()];
+        let index = ((seed + i as u64 * 7919) % crew_pool.len() as u64) as usize;
+        let template = crew_pool[index];
+
         ctx.db.shop_crew().insert(ShopCrew {
             id: 0,
             player: identity,
