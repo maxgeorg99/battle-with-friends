@@ -26,37 +26,28 @@ import {
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
 } from "spacetimedb";
-import { Crew } from "./crew_type";
-import { CrewRarity } from "./crew_rarity_type";
-// Mark import as potentially unused
-declare type __keep_CrewRarity = CrewRarity;
-import { CrewTrait } from "./crew_trait_type";
-// Mark import as potentially unused
-declare type __keep_CrewTrait = CrewTrait;
+import { PlayerItem } from "./player_item_type";
 import { ItemComponent } from "./item_component_type";
 // Mark import as potentially unused
 declare type __keep_ItemComponent = ItemComponent;
-import { CompletedItem } from "./completed_item_type";
-// Mark import as potentially unused
-declare type __keep_CompletedItem = CompletedItem;
 
 import { type EventContext, type Reducer, RemoteReducers, RemoteTables } from ".";
 declare type __keep = [EventContext, Reducer, RemoteReducers, RemoteTables];
 
 /**
- * Table handle for the table `crew`.
+ * Table handle for the table `player_item`.
  *
- * Obtain a handle from the [`crew`] property on [`RemoteTables`],
- * like `ctx.db.crew`.
+ * Obtain a handle from the [`playerItem`] property on [`RemoteTables`],
+ * like `ctx.db.playerItem`.
  *
  * Users are encouraged not to explicitly reference this type,
  * but to directly chain method calls,
- * like `ctx.db.crew.on_insert(...)`.
+ * like `ctx.db.playerItem.on_insert(...)`.
  */
-export class CrewTableHandle {
-  tableCache: __TableCache<Crew>;
+export class PlayerItemTableHandle {
+  tableCache: __TableCache<PlayerItem>;
 
-  constructor(tableCache: __TableCache<Crew>) {
+  constructor(tableCache: __TableCache<PlayerItem>) {
     this.tableCache = tableCache;
   }
 
@@ -64,24 +55,24 @@ export class CrewTableHandle {
     return this.tableCache.count();
   }
 
-  iter(): Iterable<Crew> {
+  iter(): Iterable<PlayerItem> {
     return this.tableCache.iter();
   }
   /**
-   * Access to the `id` unique index on the table `crew`,
+   * Access to the `id` unique index on the table `player_item`,
    * which allows point queries on the field of the same name
-   * via the [`CrewIdUnique.find`] method.
+   * via the [`PlayerItemIdUnique.find`] method.
    *
    * Users are encouraged not to explicitly reference this type,
    * but to directly chain method calls,
-   * like `ctx.db.crew.id().find(...)`.
+   * like `ctx.db.playerItem.id().find(...)`.
    *
-   * Get a handle on the `id` unique index on the table `crew`.
+   * Get a handle on the `id` unique index on the table `player_item`.
    */
   id = {
     // Find the subscribed row whose `id` column value is equal to `col_val`,
     // if such a row is present in the client cache.
-    find: (col_val: bigint): Crew | undefined => {
+    find: (col_val: bigint): PlayerItem | undefined => {
       for (let row of this.tableCache.iter()) {
         if (__deepEqual(row.id, col_val)) {
           return row;
@@ -90,27 +81,27 @@ export class CrewTableHandle {
     },
   };
 
-  onInsert = (cb: (ctx: EventContext, row: Crew) => void) => {
+  onInsert = (cb: (ctx: EventContext, row: PlayerItem) => void) => {
     return this.tableCache.onInsert(cb);
   }
 
-  removeOnInsert = (cb: (ctx: EventContext, row: Crew) => void) => {
+  removeOnInsert = (cb: (ctx: EventContext, row: PlayerItem) => void) => {
     return this.tableCache.removeOnInsert(cb);
   }
 
-  onDelete = (cb: (ctx: EventContext, row: Crew) => void) => {
+  onDelete = (cb: (ctx: EventContext, row: PlayerItem) => void) => {
     return this.tableCache.onDelete(cb);
   }
 
-  removeOnDelete = (cb: (ctx: EventContext, row: Crew) => void) => {
+  removeOnDelete = (cb: (ctx: EventContext, row: PlayerItem) => void) => {
     return this.tableCache.removeOnDelete(cb);
   }
 
   // Updates are only defined for tables with primary keys.
-  onUpdate = (cb: (ctx: EventContext, oldRow: Crew, newRow: Crew) => void) => {
+  onUpdate = (cb: (ctx: EventContext, oldRow: PlayerItem, newRow: PlayerItem) => void) => {
     return this.tableCache.onUpdate(cb);
   }
 
-  removeOnUpdate = (cb: (ctx: EventContext, onRow: Crew, newRow: Crew) => void) => {
+  removeOnUpdate = (cb: (ctx: EventContext, onRow: PlayerItem, newRow: PlayerItem) => void) => {
     return this.tableCache.removeOnUpdate(cb);
   }}

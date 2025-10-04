@@ -32,6 +32,12 @@ declare type __keep_CrewRarity = CrewRarity;
 import { CrewTrait } from "./crew_trait_type";
 // Mark import as potentially unused
 declare type __keep_CrewTrait = CrewTrait;
+import { ItemComponent } from "./item_component_type";
+// Mark import as potentially unused
+declare type __keep_ItemComponent = ItemComponent;
+import { CompletedItem } from "./completed_item_type";
+// Mark import as potentially unused
+declare type __keep_CompletedItem = CompletedItem;
 
 
 export type Crew = {
@@ -47,6 +53,9 @@ export type Crew = {
   defense: number,
   level: number,
   slotIndex: number | undefined,
+  item1: ItemComponent | undefined,
+  item2: ItemComponent | undefined,
+  completedItem: CompletedItem | undefined,
 };
 /**
  * An object for generated helper functions.
@@ -71,6 +80,9 @@ export const Crew = {
         { name: "defense", algebraicType: __AlgebraicTypeValue.U32},
         { name: "level", algebraicType: __AlgebraicTypeValue.U8},
         { name: "slotIndex", algebraicType: __AlgebraicTypeValue.createOptionType(__AlgebraicTypeValue.U8)},
+        { name: "item1", algebraicType: __AlgebraicTypeValue.createOptionType(ItemComponent.getTypeScriptAlgebraicType())},
+        { name: "item2", algebraicType: __AlgebraicTypeValue.createOptionType(ItemComponent.getTypeScriptAlgebraicType())},
+        { name: "completedItem", algebraicType: __AlgebraicTypeValue.createOptionType(CompletedItem.getTypeScriptAlgebraicType())},
       ]
     });
   },

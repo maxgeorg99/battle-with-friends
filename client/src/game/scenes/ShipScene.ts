@@ -706,6 +706,34 @@ export default class ShipScene extends Phaser.Scene {
     }).setOrigin(1, 0);
     this.statsTooltip.add(levelValue);
 
+    // Items display
+    if (crew.completedItem) {
+      const itemName = this.getCompletedItemName(crew.completedItem);
+      const itemText = this.add.text(0, statsY + lineHeight * 4 + 5, `⚔️ ${itemName}`, {
+        fontSize: '11px',
+        color: '#ffd700',
+        fontFamily: 'Georgia, serif',
+        fontStyle: 'bold',
+        align: 'center',
+      }).setOrigin(0.5, 0);
+      this.statsTooltip.add(itemText);
+    } else if (crew.item1 || crew.item2) {
+      let itemsText = '🎒 ';
+      if (crew.item1) {
+        itemsText += this.getItemComponentName(crew.item1);
+      }
+      if (crew.item2) {
+        itemsText += ` + ${this.getItemComponentName(crew.item2)}`;
+      }
+      const itemText = this.add.text(0, statsY + lineHeight * 4 + 5, itemsText, {
+        fontSize: '10px',
+        color: '#87ceeb',
+        fontFamily: 'Georgia, serif',
+        align: 'center',
+      }).setOrigin(0.5, 0);
+      this.statsTooltip.add(itemText);
+    }
+
     // Position and show
     this.statsTooltip.setPosition(tooltipX, tooltipY);
     this.statsTooltip.setVisible(true);
@@ -813,12 +841,49 @@ export default class ShipScene extends Phaser.Scene {
       }
     }
 
+    // Items section
+    const itemsBg = this.add.rectangle(512, 420, 760, 120, 0xa0826d, 0.5)
+      .setStrokeStyle(3, 0x654321);
+    this.chestOverlay.add(itemsBg);
+
+    const itemsLabel = this.add.text(180, 370, 'ITEM COMPONENTS', {
+      fontSize: '24px',
+      color: '#3d2817',
+      fontFamily: 'Georgia, serif',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+    this.chestOverlay.add(itemsLabel);
+
+    // Display player's item inventory
+    if (this.connection && this.localIdentity) {
+      const playerItems = Array.from(this.connection.db.playerItem.iter())
+        .filter(item => item.owner && item.owner.isEqual(this.localIdentity));
+
+      if (playerItems.length > 0) {
+        playerItems.forEach((item, index) => {
+          const x = 200 + (index % 10) * 60;
+          const y = 420;
+
+          const itemCard = this.createItemComponentCard(item.component, x, y, item.id);
+          this.chestOverlay.add(itemCard);
+        });
+      } else {
+        const emptyText = this.add.text(512, 420, 'No item components in inventory', {
+          fontSize: '16px',
+          color: '#654321',
+          fontFamily: 'Georgia, serif',
+          fontStyle: 'italic',
+        }).setOrigin(0.5);
+        this.chestOverlay.add(emptyText);
+      }
+    }
+
     // Stats section
-    const statsBg = this.add.rectangle(512, 500, 760, 150, 0xa0826d, 0.5)
+    const statsBg = this.add.rectangle(512, 560, 760, 80, 0xa0826d, 0.5)
       .setStrokeStyle(3, 0x654321);
     this.chestOverlay.add(statsBg);
 
-    const statsLabel = this.add.text(180, 440, 'STATISTICS', {
+    const statsLabel = this.add.text(180, 525, 'STATISTICS', {
       fontSize: '24px',
       color: '#3d2817',
       fontFamily: 'Georgia, serif',
@@ -836,8 +901,8 @@ export default class ShipScene extends Phaser.Scene {
           .filter(c => c.owner && c.owner.isEqual(this.localIdentity)).length;
 
         const statsText = `Wins: ${player.wins}  |  Losses: ${player.losses}  |  Total Crew: ${crewCount}  |  Ship: ${player.shipType?.tag || 'Raft'}`;
-        const stats = this.add.text(512, 500, statsText, {
-          fontSize: '20px',
+        const stats = this.add.text(512, 560, statsText, {
+          fontSize: '18px',
           color: '#3d2817',
           fontFamily: 'Georgia, serif',
           fontStyle: 'bold',
@@ -904,5 +969,197 @@ export default class ShipScene extends Phaser.Scene {
     console.log('📦 Closing treasure chest...');
     this.isChestOpen = false;
     this.chestOverlay.setVisible(false);
+  }
+
+  private createItemComponentCard(component: any, x: number, y: number, itemId?: bigint): Phaser.GameObjects.Container {
+    const card = this.add.container(x, y);
+
+    // Get component name
+    const componentName = this.getItemComponentName(component);
+
+    // Item background with color based on type
+    const itemColor = this.getItemComponentColor(component);
+    const bg = this.add.rectangle(0, 0, 50, 50, itemColor)
+      .setStrokeStyle(2, 0x3d2817);
+    card.add(bg);
+
+    // Item abbreviation or icon
+    const abbrev = componentName.split(' ').map(w => w[0]).join('').substring(0, 2);
+    const text = this.add.text(0, 0, abbrev, {
+      fontSize: '16px',
+      color: '#fff',
+      fontFamily: 'Georgia, serif',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+    card.add(text);
+
+    // Make draggable
+    card.setSize(50, 50);
+    bg.setInteractive(new Phaser.Geom.Rectangle(-25, -25, 50, 50), Phaser.Geom.Rectangle.Contains);
+    bg.input!.cursor = 'grab';
+
+    // Store component data on the card for later use
+    (card as any).itemComponent = component;
+    (card as any).itemId = itemId;
+
+    let tooltipContainer: Phaser.GameObjects.Container | null = null;
+
+    bg.on('pointerover', () => {
+      bg.setFillStyle(itemColor, 0.7);
+
+      // Show tooltip with item name
+      tooltipContainer = this.add.container(card.x, card.y - 40);
+      tooltipContainer.setDepth(2000);
+
+      const tooltipBg = this.add.rectangle(0, 0, componentName.length * 7 + 10, 20, 0x000000, 0.8)
+        .setStrokeStyle(1, 0xffd700);
+      tooltipContainer.add(tooltipBg);
+
+      const tooltipText = this.add.text(0, 0, componentName, {
+        fontSize: '11px',
+        color: '#fff',
+        fontFamily: 'Georgia, serif',
+      }).setOrigin(0.5);
+      tooltipContainer.add(tooltipText);
+    });
+
+    bg.on('pointerout', () => {
+      bg.setFillStyle(itemColor);
+      if (tooltipContainer) {
+        tooltipContainer.destroy();
+        tooltipContainer = null;
+      }
+    });
+
+    // Enable dragging
+    this.input.setDraggable(card);
+
+    card.on('dragstart', (pointer: Phaser.Input.Pointer) => {
+      card.setDepth(1500);
+      card.setAlpha(0.7);
+      bg.input!.cursor = 'grabbing';
+      if (tooltipContainer) {
+        tooltipContainer.destroy();
+        tooltipContainer = null;
+      }
+    });
+
+    card.on('drag', (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
+      card.setPosition(dragX, dragY);
+    });
+
+    card.on('dragend', (pointer: Phaser.Input.Pointer) => {
+      card.setDepth(0);
+      card.setAlpha(1);
+      bg.input!.cursor = 'grab';
+
+      // Check if dropped on a crew member
+      const droppedOnCrew = this.getCrewAtPosition(pointer.x, pointer.y);
+
+      if (droppedOnCrew && itemId) {
+        console.log(`🎒 Equipping ${componentName} to ${droppedOnCrew.name}`);
+        this.equipItemToCrew(Number(droppedOnCrew.id), component, Number(itemId));
+      }
+
+      // Return to original position
+      card.setPosition(x, y);
+    });
+
+    return card;
+  }
+
+  private getItemComponentName(component: any): string {
+    const tag = component?.tag || component;
+    const nameMap: Record<string, string> = {
+      'Cutlass': 'Cutlass',
+      'SniperGoggles': 'Sniper Goggles',
+      'ShellDial': 'Shell Dial',
+      'ToneDial': 'Tone Dial',
+      'SeastoneFragment': 'Seastone Fragment',
+      'TidalCloak': 'Tidal Cloak',
+      'EnergyDrink': 'Energy Drink',
+      'Meat': 'Meat',
+    };
+    return nameMap[tag] || tag;
+  }
+
+  private getItemComponentColor(component: any): number {
+    const tag = component?.tag || component;
+    const colorMap: Record<string, number> = {
+      'Cutlass': 0xff6b6b,           // Red (AD)
+      'SniperGoggles': 0xffa500,     // Orange (Crit)
+      'ShellDial': 0xffff00,         // Yellow (AS)
+      'ToneDial': 0x9370db,          // Purple (AP)
+      'SeastoneFragment': 0x708090,  // Gray (Armor)
+      'TidalCloak': 0x4169e1,        // Blue (MR)
+      'EnergyDrink': 0x00ced1,       // Cyan (Mana)
+      'Meat': 0xff69b4,              // Pink (HP)
+    };
+    return colorMap[tag] || 0x888888;
+  }
+
+  private getCompletedItemName(item: any): string {
+    const tag = item?.tag || item;
+    const nameMap: Record<string, string> = {
+      'Yoru': 'Yoru',
+      'Kabuto': 'Kabuto',
+      'Shusui': 'Shusui',
+      'ClimaTact': 'Clima-Tact',
+      'ThunderTempo': 'Thunder Tempo',
+      'MirageFlower': 'Mirage Flower',
+      'AdamWood': 'Adam Wood',
+      'SeaKingScale': 'Sea King Scale',
+      'ThousandSunnyHull': 'Thousand Sunny Hull',
+      'VivrCard': 'Vivre Card',
+      'LogPose': 'Log Pose',
+      'Poneglyph': 'Poneglyph',
+      'GumGumFruit': 'Gum-Gum Fruit',
+      'GomuGomuNoMi': 'Gomu Gomu no Mi',
+      'HakiMastery': 'Haki Mastery',
+    };
+    return nameMap[tag] || tag;
+  }
+
+  private getCrewAtPosition(x: number, y: number): any | null {
+    if (!this.connection || !this.localIdentity) return null;
+
+    // Get all crew on the field
+    const allCrew = Array.from(this.connection.db.crew.iter())
+      .filter(c => c.owner && c.owner.isEqual(this.localIdentity) && c.slotIndex !== null);
+
+    // Check each crew's position
+    for (const crew of allCrew) {
+      const slotIndex = Number(crew.slotIndex);
+      const gridX = slotIndex % 5;
+      const gridY = Math.floor(slotIndex / 5);
+
+      const screenPos = this.gridToScreen(gridX, gridY);
+
+      // Check if click is within crew bounds (50x50 square)
+      if (Math.abs(x - screenPos.x) <= 25 && Math.abs(y - screenPos.y) <= 25) {
+        return crew;
+      }
+    }
+
+    return null;
+  }
+
+  private equipItemToCrew(crewId: number, component: any, itemId: number): void {
+    if (!this.connection) {
+      console.error('No connection available');
+      return;
+    }
+
+    try {
+      // Call the reducer to equip the item
+      this.connection.reducers.equipItemToCrew(BigInt(crewId), component);
+      console.log(`✅ Successfully equipped item to crew ${crewId}`);
+
+      // Close and reopen chest to refresh display
+      this.closeChest();
+      setTimeout(() => this.openChest(), 100);
+    } catch (error) {
+      console.error('Failed to equip item:', error);
+    }
   }
 }
