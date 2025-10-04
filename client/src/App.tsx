@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from 'react-oidc-context';
-import PhaserGame from './game/PhaserGame';
+import GameWrapper from './components/GameWrapper';
 
 const App: React.FC = () => {
   const { isAuthenticated, signinRedirect } = useAuth();
@@ -27,7 +27,7 @@ const App: React.FC = () => {
     );
   }
 
-  return <PhaserGame />;
+  return <GameWrapper />;
 };
 
 export default App;
