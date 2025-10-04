@@ -244,19 +244,19 @@ export default class ShipScene extends Phaser.Scene {
 
     // Subscribe to crew updates
     this.connection.db.crew.onInsert((crew) => {
-      if (this.localIdentity && crew.owner.isEqual(this.localIdentity)) {
+      if (this.localIdentity && crew.owner && crew.owner.isEqual(this.localIdentity)) {
         this.addCrewEntity(crew);
       }
     });
 
     this.connection.db.crew.onUpdate((oldCrew, newCrew) => {
-      if (this.localIdentity && newCrew.owner.isEqual(this.localIdentity)) {
+      if (this.localIdentity && newCrew.owner && newCrew.owner.isEqual(this.localIdentity)) {
         this.updateCrewEntity(newCrew);
       }
     });
 
     this.connection.db.crew.onDelete((crew) => {
-      if (this.localIdentity && crew.owner.isEqual(this.localIdentity)) {
+      if (this.localIdentity && crew.owner && crew.owner.isEqual(this.localIdentity)) {
         this.removeCrewEntity(crew.id);
       }
     });
@@ -290,7 +290,7 @@ export default class ShipScene extends Phaser.Scene {
     if (!this.connection || !this.localIdentity) return;
 
     const crewList = Array.from(this.connection.db.crew.iter())
-      .filter(c => c.owner.isEqual(this.localIdentity));
+      .filter(c => c.owner && c.owner.isEqual(this.localIdentity));
 
     for (const crew of crewList) {
       this.addCrewEntity(crew);
