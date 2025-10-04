@@ -24,23 +24,25 @@ export default class ShipScene extends Phaser.Scene {
   preload() {
     console.log('🔄 ShipScene preload started');
 
+    const baseUrl = import.meta.env.BASE_URL || '/';
+
     // Load crew portraits for shop
-    this.load.image('shop-luffy', '/assets/shop/icon/Luffy.JPG');
-    this.load.image('shop-lysop', '/assets/shop/icon/Lysop.JPG');
-    this.load.image('shop-nami', '/assets/shop/icon/Nami.JPG');
-    this.load.image('shop-zoro', '/assets/shop/icon/Zoro.JPG');
+    this.load.image('shop-luffy', `${baseUrl}assets/shop/icon/Luffy.JPG`);
+    this.load.image('shop-lysop', `${baseUrl}assets/shop/icon/Lysop.JPG`);
+    this.load.image('shop-nami', `${baseUrl}assets/shop/icon/Nami.JPG`);
+    this.load.image('shop-zoro', `${baseUrl}assets/shop/icon/Zoro.JPG`);
 
     // Load unit sprites for field
-    this.load.image('unit-luffy', '/assets/unit/Luffy.PNG');
-    this.load.image('unit-lysop', '/assets/unit/Lysop.PNG');
-    this.load.image('unit-nami', '/assets/unit/Nami.PNG');
-    this.load.image('unit-zoro', '/assets/unit/Zoro.PNG');
+    this.load.image('unit-luffy', `${baseUrl}assets/unit/Luffy.PNG`);
+    this.load.image('unit-lysop', `${baseUrl}assets/unit/Lysop.PNG`);
+    this.load.image('unit-nami', `${baseUrl}assets/unit/Nami.PNG`);
+    this.load.image('unit-zoro', `${baseUrl}assets/unit/Zoro.PNG`);
 
     // Load trait icons
-    this.load.image('trait-marines', '/assets/trait/Marines.png');
-    this.load.image('trait-logia', '/assets/trait/Logia.png');
-    this.load.image('trait-paramecia', '/assets/trait/Paramecia.png');
-    this.load.image('trait-zoan', '/assets/trait/Zoan.png');
+    this.load.image('trait-marines', `${baseUrl}assets/trait/Marines.png`);
+    this.load.image('trait-logia', `${baseUrl}assets/trait/Logia.png`);
+    this.load.image('trait-paramecia', `${baseUrl}assets/trait/Paramecia.png`);
+    this.load.image('trait-zoan', `${baseUrl}assets/trait/Zoan.png`);
 
     // Add load event listeners
     this.load.on('complete', () => {
@@ -433,9 +435,11 @@ export default class ShipScene extends Phaser.Scene {
     const x = 150 + shopIndex * 120;
     card.setPosition(x, 150);
 
-    // Make clickable to buy
-    card.setInteractive({ useHandCursor: true })
-      .on('pointerdown', () => this.buyCrewFromShop(shopCrew.id));
+    // Make clickable to buy - use setSize for Container hit area
+    card.setSize(100, 120);
+    card.setInteractive(new Phaser.Geom.Rectangle(-50, -60, 100, 120), Phaser.Geom.Rectangle.Contains);
+    card.input!.cursor = 'pointer';
+    card.on('pointerdown', () => this.buyCrewFromShop(shopCrew.id));
 
     this.shopContainer.add(card);
   }
