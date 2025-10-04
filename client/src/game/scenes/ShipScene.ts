@@ -13,10 +13,13 @@ export default class ShipScene extends Phaser.Scene {
 
   // UI elements
   private berriesText!: Phaser.GameObjects.Text;
+  private berriesDisplayText!: Phaser.GameObjects.Text;
   private bountyText!: Phaser.GameObjects.Text;
   private shipTypeText!: Phaser.GameObjects.Text;
   private shopContainer!: Phaser.GameObjects.Container;
   private statsTooltip!: Phaser.GameObjects.Container;
+  private chestOverlay!: Phaser.GameObjects.Container;
+  private isChestOpen: boolean = false;
 
   constructor() {
     super('ShipScene');
@@ -101,6 +104,9 @@ export default class ShipScene extends Phaser.Scene {
     // Create stats tooltip (initially hidden)
     this.createStatsTooltip();
 
+    // Create chest overlay (initially hidden)
+    this.createChestOverlay();
+
     // Subscribe to SpacetimeDB updates
     this.subscribeToDatabase();
 
@@ -144,19 +150,47 @@ export default class ShipScene extends Phaser.Scene {
 
     this.shopContainer = this.add.container(0, 0);
 
-    // Bottom left - Level/Round indicator
-    const levelBg = this.add.circle(105, 680, 50, 0xd4b896)
+    // Bottom left - Berries display
+    const berriesBg = this.add.circle(105, 680, 50, 0xd4b896)
       .setStrokeStyle(4, 0x3d2817);
 
-    this.add.text(105, 655, '8', {
-      fontSize: '48px',
+    // Berry amount (will be updated)
+    this.berriesDisplayText = this.add.text(105, 670, '1.0M', {
+      fontSize: '20px',
       color: '#3d2817',
       fontFamily: 'Georgia, serif',
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    const berriesIcon = this.add.circle(105, 705, 15, 0xffd700)
+    // Berry icon (₿ symbol)
+    this.add.text(105, 695, '₿', {
+      fontSize: '24px',
+      color: '#ffd700',
+      fontFamily: 'Georgia, serif',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+
+    // Top right - Treasure Chest button
+    const chestBg = this.add.rectangle(920, 80, 100, 100, 0x8b6f47)
+      .setStrokeStyle(4, 0x3d2817);
+    chestBg.setInteractive(new Phaser.Geom.Rectangle(-50, -50, 100, 100), Phaser.Geom.Rectangle.Contains);
+    chestBg.input!.cursor = 'pointer';
+    chestBg.on('pointerdown', () => this.openChest());
+
+    // Chest icon (simple treasure chest representation)
+    this.add.rectangle(920, 80, 70, 50, 0xa0826d)
       .setStrokeStyle(3, 0x3d2817);
+    this.add.rectangle(920, 65, 70, 10, 0xffd700)
+      .setStrokeStyle(2, 0x3d2817);
+    this.add.circle(920, 80, 8, 0xffd700)
+      .setStrokeStyle(2, 0x3d2817);
+
+    this.add.text(920, 110, 'CHEST', {
+      fontSize: '12px',
+      color: '#3d2817',
+      fontFamily: 'Georgia, serif',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
 
     // Bottom right - Refresh button
     const refreshBg = this.add.rectangle(895, 680, 200, 60, 0xd4b896)
@@ -278,6 +312,11 @@ export default class ShipScene extends Phaser.Scene {
     this.berriesText.setText(`Berries: ${player.berries}`);
     this.bountyText.setText(`Bounty: ${player.bounty}`);
     this.shipTypeText.setText(`Ship: ${player.shipType}`);
+
+    // Update the visible berries display in bottom left
+    if (this.berriesDisplayText) {
+      this.berriesDisplayText.setText(this.formatBerries(player.berries));
+    }
   }
 
   private addCrewEntity(crew: any) {
@@ -304,9 +343,11 @@ export default class ShipScene extends Phaser.Scene {
 
     // Add grid position
     if (crew.slotIndex !== null && crew.slotIndex !== undefined) {
+      // Convert slot index (0-14) to grid coordinates (3x5 grid)
+      const slotIndex = Number(crew.slotIndex);
       const gridPos: GridPosition = {
-        x: crew.slotIndex,
-        y: 0,
+        x: slotIndex % 5,  // Column (0-4)
+        y: Math.floor(slotIndex / 5),  // Row (0-2)
         width: 1,
         height: 1,
       };
@@ -501,23 +542,30 @@ export default class ShipScene extends Phaser.Scene {
   private buyCrewFromShop(shopCrewId: bigint) {
     if (!this.connection || !this.localIdentity) return;
 
-    console.log('Buying crew from shop:', shopCrewId);
-    // Find empty slot
+    console.log('💰 Buying crew from shop:', shopCrewId);
+    // Find empty slot on 3x5 grid (15 total slots)
     const occupiedSlots = Array.from(this.connection.db.crew.iter())
-      .filter(c => c.owner.isEqual(this.localIdentity) && c.slotIndex !== null)
+      .filter(c => c.owner && c.owner.isEqual(this.localIdentity) && c.slotIndex !== null)
       .map(c => c.slotIndex);
 
-    for (let i = 0; i < 10; i++) {
-      if (!occupiedSlots.includes(i)) {
-        this.connection.reducers.buyCrew(shopCrewId, i);
+    // Find first empty slot (0-14 for 3x5 grid)
+    for (let slot = 0; slot < 15; slot++) {
+      if (!occupiedSlots.includes(slot)) {
+        console.log('🎯 Found empty slot:', slot);
+        this.connection.reducers.buyCrew(shopCrewId, slot);
         return;
       }
     }
 
-    console.warn('No empty slots!');
+    console.warn('⚠️ No empty slots on the raft!');
   }
 
   private refreshShop() {
+    if (!this.connection) {
+      console.error('❌ No connection to refresh shop');
+      return;
+    }
+    console.log('🔄 Refreshing shop...');
     this.connection.reducers.refreshShop();
   }
 
@@ -583,15 +631,6 @@ export default class ShipScene extends Phaser.Scene {
       wordWrap: { width: tooltipWidth - 20 },
     }).setOrigin(0.5);
     this.statsTooltip.add(nameText);
-
-    // Rarity
-    const rarityText = this.add.text(0, -40, crew.rarity, {
-      fontSize: '11px',
-      color: '#d4b896',
-      fontFamily: 'Georgia, serif',
-      align: 'center',
-    }).setOrigin(0.5);
-    this.statsTooltip.add(rarityText);
 
     // Traits
     const trait1Name = this.getTraitDisplayName(crew.trait1);
@@ -674,5 +713,196 @@ export default class ShipScene extends Phaser.Scene {
 
   private hideStatsTooltip() {
     this.statsTooltip.setVisible(false);
+  }
+
+  private createChestOverlay() {
+    this.chestOverlay = this.add.container(0, 0);
+    this.chestOverlay.setDepth(9999); // Below tooltip but above everything else
+    this.chestOverlay.setVisible(false);
+  }
+
+  private openChest() {
+    if (this.isChestOpen) {
+      this.closeChest();
+      return;
+    }
+
+    console.log('📦 Opening treasure chest...');
+    this.isChestOpen = true;
+
+    // Clear previous content
+    this.chestOverlay.removeAll(true);
+
+    // Semi-transparent dark background overlay
+    const overlay = this.add.rectangle(512, 384, 1024, 768, 0x000000, 0.7);
+    overlay.setInteractive();
+    overlay.on('pointerdown', () => this.closeChest());
+    this.chestOverlay.add(overlay);
+
+    // Main chest panel
+    const panelWidth = 800;
+    const panelHeight = 600;
+    const panelBg = this.add.rectangle(512, 384, panelWidth, panelHeight, 0xd4b896)
+      .setStrokeStyle(6, 0x3d2817);
+    this.chestOverlay.add(panelBg);
+
+    // Title
+    const titleBg = this.add.rectangle(512, 120, 400, 70, 0x8b6f47)
+      .setStrokeStyle(4, 0x3d2817);
+    this.chestOverlay.add(titleBg);
+
+    const title = this.add.text(512, 120, 'TREASURE CHEST', {
+      fontSize: '36px',
+      color: '#ffd700',
+      fontFamily: 'Georgia, serif',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+    this.chestOverlay.add(title);
+
+    // Close button
+    const closeBtn = this.add.rectangle(850, 120, 60, 60, 0xff4444)
+      .setStrokeStyle(3, 0x3d2817);
+    closeBtn.setInteractive(new Phaser.Geom.Rectangle(-30, -30, 60, 60), Phaser.Geom.Rectangle.Contains);
+    closeBtn.input!.cursor = 'pointer';
+    closeBtn.on('pointerdown', () => this.closeChest());
+    this.chestOverlay.add(closeBtn);
+
+    const closeText = this.add.text(850, 120, 'X', {
+      fontSize: '32px',
+      color: '#fff',
+      fontFamily: 'Georgia, serif',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+    this.chestOverlay.add(closeText);
+
+    // Benched crew section
+    const benchBg = this.add.rectangle(512, 300, 760, 180, 0xa0826d, 0.5)
+      .setStrokeStyle(3, 0x654321);
+    this.chestOverlay.add(benchBg);
+
+    const benchLabel = this.add.text(180, 220, 'BENCHED CREW', {
+      fontSize: '24px',
+      color: '#3d2817',
+      fontFamily: 'Georgia, serif',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+    this.chestOverlay.add(benchLabel);
+
+    // Display benched crew (crew with slotIndex === null)
+    if (this.connection && this.localIdentity) {
+      const benchedCrew = Array.from(this.connection.db.crew.iter())
+        .filter(c => c.owner && c.owner.isEqual(this.localIdentity) && c.slotIndex === null);
+
+      benchedCrew.forEach((crew, index) => {
+        const x = 200 + (index % 8) * 80;
+        const y = 270 + Math.floor(index / 8) * 90;
+
+        // Create mini crew card
+        const card = this.createMiniCrewCard(crew, x, y);
+        this.chestOverlay.add(card);
+      });
+
+      if (benchedCrew.length === 0) {
+        const emptyText = this.add.text(512, 300, 'No benched crew members', {
+          fontSize: '18px',
+          color: '#654321',
+          fontFamily: 'Georgia, serif',
+          fontStyle: 'italic',
+        }).setOrigin(0.5);
+        this.chestOverlay.add(emptyText);
+      }
+    }
+
+    // Stats section
+    const statsBg = this.add.rectangle(512, 500, 760, 150, 0xa0826d, 0.5)
+      .setStrokeStyle(3, 0x654321);
+    this.chestOverlay.add(statsBg);
+
+    const statsLabel = this.add.text(180, 440, 'STATISTICS', {
+      fontSize: '24px',
+      color: '#3d2817',
+      fontFamily: 'Georgia, serif',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+    this.chestOverlay.add(statsLabel);
+
+    // Get player stats
+    if (this.connection && this.localIdentity) {
+      const player = Array.from(this.connection.db.player.iter())
+        .find(p => p.identity.isEqual(this.localIdentity));
+
+      if (player) {
+        const crewCount = Array.from(this.connection.db.crew.iter())
+          .filter(c => c.owner && c.owner.isEqual(this.localIdentity)).length;
+
+        const statsText = `Wins: ${player.wins}  |  Losses: ${player.losses}  |  Total Crew: ${crewCount}  |  Ship: ${player.shipType?.tag || 'Raft'}`;
+        const stats = this.add.text(512, 500, statsText, {
+          fontSize: '20px',
+          color: '#3d2817',
+          fontFamily: 'Georgia, serif',
+          fontStyle: 'bold',
+        }).setOrigin(0.5);
+        this.chestOverlay.add(stats);
+      }
+    }
+
+    this.chestOverlay.setVisible(true);
+  }
+
+  private createMiniCrewCard(crew: any, x: number, y: number): Phaser.GameObjects.Container {
+    const card = this.add.container(x, y);
+
+    // Card background
+    const rarityColors: Record<string, number> = {
+      Common: 0x87ceeb,
+      Rare: 0x4169e1,
+      Epic: 0x9370db,
+      Legendary: 0xffd700,
+    };
+
+    const bg = this.add.rectangle(0, 0, 60, 80, 0xd4b896)
+      .setStrokeStyle(3, rarityColors[crew.rarity] || 0x87ceeb);
+    card.add(bg);
+
+    // Crew name
+    const nameText = this.add.text(0, -30, crew.name.split(' ')[0], {
+      fontSize: '10px',
+      color: '#3d2817',
+      fontFamily: 'Georgia, serif',
+      fontStyle: 'bold',
+      align: 'center',
+      wordWrap: { width: 55 },
+    }).setOrigin(0.5);
+    card.add(nameText);
+
+    // Level
+    const levelText = this.add.text(0, 30, `Lv ${crew.level || 1}`, {
+      fontSize: '9px',
+      color: '#3d2817',
+      fontFamily: 'Georgia, serif',
+    }).setOrigin(0.5);
+    card.add(levelText);
+
+    // Make clickable to show details
+    bg.setInteractive(new Phaser.Geom.Rectangle(-30, -40, 60, 80), Phaser.Geom.Rectangle.Contains);
+    bg.input!.cursor = 'pointer';
+    bg.on('pointerover', () => {
+      bg.setFillStyle(0xe4d4a6);
+    });
+    bg.on('pointerout', () => {
+      bg.setFillStyle(0xd4b896);
+    });
+    bg.on('pointerdown', () => {
+      console.log('Selected crew:', crew.name);
+      // TODO: Show detailed crew info or allow placing on board
+    });
+
+    return card;
+  }
+
+  private closeChest() {
+    console.log('📦 Closing treasure chest...');
+    this.isChestOpen = false;
+    this.chestOverlay.setVisible(false);
   }
 }
