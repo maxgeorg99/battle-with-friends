@@ -31,7 +31,9 @@ export class DragDropSystem implements System {
     const sprite = entity.getComponent<Sprite>(ComponentTypes.SPRITE)!;
     const draggable = entity.getComponent<Draggable>(ComponentTypes.DRAGGABLE)!;
 
-    sprite.gameObject.setInteractive({ draggable: true });
+    // Set interactive with proper hit area for Container
+    sprite.gameObject.setSize(100, 120);
+    sprite.gameObject.setInteractive(new Phaser.Geom.Rectangle(-50, -60, 100, 120), Phaser.Geom.Rectangle.Contains);
 
     sprite.gameObject.on('dragstart', (pointer: Phaser.Input.Pointer) => {
       draggable.isDragging = true;
