@@ -3,9 +3,9 @@ import { ComponentTypes, Draggable, Sprite, GridPosition } from '../ecs/Componen
 
 export class DragDropSystem implements System {
   private scene: Phaser.Scene;
-  private gridCellSize = 64;
-  private shipGridOffsetX = 200;
-  private shipGridOffsetY = 400;
+  private gridCellSize = 56;
+  private shipGridOffsetX = 232;
+  private shipGridOffsetY = 580;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -32,8 +32,8 @@ export class DragDropSystem implements System {
     const draggable = entity.getComponent<Draggable>(ComponentTypes.DRAGGABLE)!;
 
     // Set interactive with proper hit area for Container
-    sprite.gameObject.setSize(100, 120);
-    sprite.gameObject.setInteractive(new Phaser.Geom.Rectangle(-50, -60, 100, 120), Phaser.Geom.Rectangle.Contains);
+    sprite.gameObject.setSize(50, 50);
+    sprite.gameObject.setInteractive(new Phaser.Geom.Rectangle(-25, -25, 50, 50), Phaser.Geom.Rectangle.Contains);
 
     sprite.gameObject.on('dragstart', (pointer: Phaser.Input.Pointer) => {
       draggable.isDragging = true;

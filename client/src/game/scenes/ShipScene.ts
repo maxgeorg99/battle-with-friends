@@ -116,106 +116,120 @@ export default class ShipScene extends Phaser.Scene {
   }
 
   private createUI() {
-    // Top bar - Player info
-    const topBar = this.add.rectangle(512, 40, 1024, 80, 0xf4e4c1);
+    // RECRUIT banner at top
+    const recruitBanner = this.add.rectangle(512, 75, 450, 65, 0xd4b896)
+      .setStrokeStyle(4, 0x3d2817);
 
-    this.berriesText = this.add.text(50, 20, 'Berries: 100', {
-      fontSize: '24px',
-      color: '#000',
-      fontStyle: 'bold',
-    });
-
-    this.bountyText = this.add.text(250, 20, 'Bounty: 0', {
-      fontSize: '24px',
-      color: '#8b0000',
-      fontStyle: 'bold',
-    });
-
-    this.shipTypeText = this.add.text(450, 20, 'Ship: Raft', {
-      fontSize: '24px',
-      color: '#000',
-      fontStyle: 'bold',
-    });
-
-    // Battle button
-    const battleBtn = this.add.rectangle(900, 40, 150, 50, 0xff4444)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerdown', () => this.startBattle());
-
-    this.add.text(900, 40, 'START BATTLE', {
-      fontSize: '14px',
-      color: '#fff',
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
-
-    // Shop section (top)
-    const shopBg = this.add.rectangle(512, 150, 900, 120, 0xf4e4c1);
-
-    this.add.text(512, 100, 'RECRUIT', {
-      fontSize: '32px',
-      color: '#000',
+    this.add.text(512, 75, 'RECRUIT', {
+      fontSize: '40px',
+      color: '#3d2817',
+      fontFamily: 'Georgia, serif',
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
     this.shopContainer = this.add.container(0, 0);
 
-    // Refresh button
-    const refreshBtn = this.add.rectangle(900, 600, 150, 50, 0x44ff44)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerdown', () => this.refreshShop());
+    // Ship grid label (RAFT)
+    const raftLabel = this.add.rectangle(512, 500, 200, 60, 0xd4b896)
+      .setStrokeStyle(3, 0x3d2817);
 
-    this.add.text(900, 600, 'REFRESH', {
-      fontSize: '14px',
-      color: '#000',
+    this.add.text(512, 500, 'RAFT', {
+      fontSize: '32px',
+      color: '#3d2817',
+      fontFamily: 'Georgia, serif',
       fontStyle: 'bold',
     }).setOrigin(0.5);
+
+    // Bottom left - Level/Round indicator
+    const levelBg = this.add.circle(105, 680, 50, 0xd4b896)
+      .setStrokeStyle(4, 0x3d2817);
+
+    this.add.text(105, 655, '8', {
+      fontSize: '48px',
+      color: '#3d2817',
+      fontFamily: 'Georgia, serif',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+
+    const berriesIcon = this.add.circle(105, 705, 15, 0xffd700)
+      .setStrokeStyle(3, 0x3d2817);
 
     // Treasure Island button (bottom left)
-    const treasureBtn = this.add.rectangle(100, 650, 150, 100, 0xf4e4c1)
-      .setInteractive({ useHandCursor: true });
+    const treasureBg = this.add.rectangle(105, 555, 170, 140, 0xd4b896)
+      .setStrokeStyle(4, 0x3d2817);
+    treasureBg.setInteractive(new Phaser.Geom.Rectangle(-85, -70, 170, 140), Phaser.Geom.Rectangle.Contains);
+    treasureBg.input!.cursor = 'pointer';
 
-    this.add.text(100, 620, 'TREASURE', {
-      fontSize: '16px',
-      color: '#000',
+    this.add.text(105, 515, 'TREASURE', {
+      fontSize: '18px',
+      color: '#3d2817',
+      fontFamily: 'Georgia, serif',
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    this.add.text(100, 650, 'ISLAND', {
-      fontSize: '16px',
-      color: '#000',
+    this.add.text(105, 540, 'ISLAND', {
+      fontSize: '18px',
+      color: '#3d2817',
+      fontFamily: 'Georgia, serif',
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    this.add.text(100, 680, '1400', {
+    // Placeholder treasure icon
+    this.add.rectangle(105, 575, 60, 60, 0x8b6f47)
+      .setStrokeStyle(2, 0x3d2817);
+
+    this.add.text(105, 605, '1400', {
+      fontSize: '28px',
+      color: '#3d2817',
+      fontFamily: 'Georgia, serif',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+
+    // Bottom right - Round counter
+    const roundBg = this.add.circle(920, 680, 40, 0xd4b896)
+      .setStrokeStyle(4, 0x3d2817);
+
+    this.add.text(920, 680, '17', {
+      fontSize: '36px',
+      color: '#3d2817',
+      fontFamily: 'Georgia, serif',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+
+    // Bottom right - Refresh button
+    const refreshBg = this.add.rectangle(895, 600, 200, 60, 0xd4b896)
+      .setStrokeStyle(4, 0x3d2817);
+    refreshBg.setInteractive(new Phaser.Geom.Rectangle(-100, -30, 200, 60), Phaser.Geom.Rectangle.Contains);
+    refreshBg.input!.cursor = 'pointer';
+    refreshBg.on('pointerdown', () => this.refreshShop());
+
+    this.add.text(895, 600, 'REFRESH', {
       fontSize: '24px',
-      color: '#000',
+      color: '#3d2817',
+      fontFamily: 'Georgia, serif',
       fontStyle: 'bold',
     }).setOrigin(0.5);
+
+    // Store text references (not displayed in this minimal UI like screenshot)
+    this.berriesText = this.add.text(0, 0, '', { fontSize: '1px' }).setVisible(false);
+    this.bountyText = this.add.text(0, 0, '', { fontSize: '1px' }).setVisible(false);
+    this.shipTypeText = this.add.text(0, 0, '', { fontSize: '1px' }).setVisible(false);
   }
 
   private createShipGrid() {
-    const gridX = 200;
-    const gridY = 400;
-    const cellSize = 64;
+    const gridX = 232;
+    const gridY = 580;
+    const cellSize = 56;
 
-    // Draw ship grid (10 slots in a row)
+    // Draw ship grid (10 slots in a row) - wooden deck style
     for (let i = 0; i < 10; i++) {
       const x = gridX + i * cellSize;
       const y = gridY;
 
-      // Grid cell background
-      this.add.rectangle(x, y, cellSize - 4, cellSize - 4, 0x8b6f47, 0.5)
-        .setStrokeStyle(2, 0x000000);
+      // Grid cell background - wooden planks
+      this.add.rectangle(x, y, cellSize - 2, cellSize - 2, 0xa0826d)
+        .setStrokeStyle(3, 0x654321);
     }
-
-    // Ship label
-    this.add.text(512, 300, 'RAFT', {
-      fontSize: '32px',
-      color: '#f4e4c1',
-      fontStyle: 'bold',
-      stroke: '#000',
-      strokeThickness: 4,
-    }).setOrigin(0.5);
   }
 
   private subscribeToDatabase() {
@@ -362,65 +376,72 @@ export default class ShipScene extends Phaser.Scene {
 
     // Card background based on rarity
     const rarityColors: Record<string, number> = {
-      Common: 0xcccccc,
+      Common: 0x87ceeb,
       Rare: 0x4169e1,
       Epic: 0x9370db,
       Legendary: 0xffd700,
     };
 
-    if (spriteKey && this.textures.exists(spriteKey)) {
-      // Use sprite image
-      const sprite = this.add.image(0, 0, spriteKey);
-      sprite.setDisplaySize(100, 120);
-      container.add(sprite);
-
-      // Add rarity border
-      const border = this.add.rectangle(0, 0, 100, 120)
-        .setStrokeStyle(3, rarityColors[crew.rarity] || 0xcccccc)
-        .setFillStyle(0x000000, 0);
-      container.add(border);
-    } else {
-      // Fallback colored rectangle
-      const bg = this.add.rectangle(0, 0, 100, 120, rarityColors[crew.rarity] || 0xcccccc)
-        .setStrokeStyle(2, 0x000000);
-      container.add(bg);
-    }
-
-    // Crew name
-    const nameText = this.add.text(0, -55, crew.name, {
-      fontSize: '10px',
-      color: '#fff',
-      fontStyle: 'bold',
-      align: 'center',
-      wordWrap: { width: 90 },
-      backgroundColor: '#000000',
-      padding: { x: 4, y: 2 },
-    }).setOrigin(0.5);
-    container.add(nameText);
-
-    // Stats overlay
-    const statsText = this.add.text(0, 50,
-      `HP: ${crew.currentHp || crew.maxHp} ATK: ${crew.attack} DEF: ${crew.defense}`,
-      {
-        fontSize: '8px',
-        color: '#fff',
-        align: 'center',
-        backgroundColor: '#000000',
-        padding: { x: 4, y: 2 },
-      }
-    ).setOrigin(0.5);
-    container.add(statsText);
-
-    // Cost (for shop cards)
     if (isShopCard) {
-      const costText = this.add.text(0, 60, `⚡${crew.cost}`, {
-        fontSize: '12px',
-        color: '#ffd700',
+      // Shop card style - like screenshot
+      const cardWidth = 110;
+      const cardHeight = 140;
+
+      // Parchment background
+      const cardBg = this.add.rectangle(0, 0, cardWidth, cardHeight, 0xd4b896)
+        .setStrokeStyle(4, rarityColors[crew.rarity] || 0x87ceeb);
+      container.add(cardBg);
+
+      if (spriteKey && this.textures.exists(spriteKey)) {
+        // Portrait in upper portion
+        const portrait = this.add.image(0, -20, spriteKey);
+        portrait.setDisplaySize(90, 75);
+        container.add(portrait);
+      } else {
+        // Fallback colored rectangle
+        const portrait = this.add.rectangle(0, -20, 90, 75, rarityColors[crew.rarity] || 0x87ceeb);
+        container.add(portrait);
+      }
+
+      // Crew name at bottom
+      const nameText = this.add.text(0, 45, crew.name.toUpperCase(), {
+        fontSize: '14px',
+        color: '#3d2817',
+        fontFamily: 'Georgia, serif',
         fontStyle: 'bold',
-        backgroundColor: '#000000',
-        padding: { x: 4, y: 2 },
+        align: 'center',
+      }).setOrigin(0.5);
+      container.add(nameText);
+
+      // Cost at bottom with coin icon
+      const costBg = this.add.circle(0, 65, 12, 0xffd700)
+        .setStrokeStyle(2, 0x3d2817);
+      container.add(costBg);
+
+      const costText = this.add.text(0, 65, `${crew.cost || 1}`, {
+        fontSize: '14px',
+        color: '#3d2817',
+        fontFamily: 'Georgia, serif',
+        fontStyle: 'bold',
       }).setOrigin(0.5);
       container.add(costText);
+    } else {
+      // Field unit card - simpler
+      if (spriteKey && this.textures.exists(spriteKey)) {
+        const sprite = this.add.image(0, 0, spriteKey);
+        sprite.setDisplaySize(50, 50);
+        container.add(sprite);
+
+        // Border
+        const border = this.add.rectangle(0, 0, 50, 50)
+          .setStrokeStyle(3, rarityColors[crew.rarity] || 0x87ceeb)
+          .setFillStyle(0x000000, 0);
+        container.add(border);
+      } else {
+        const bg = this.add.rectangle(0, 0, 50, 50, rarityColors[crew.rarity] || 0x87ceeb)
+          .setStrokeStyle(2, 0x3d2817);
+        container.add(bg);
+      }
     }
 
     return container;
@@ -430,14 +451,16 @@ export default class ShipScene extends Phaser.Scene {
     // Create shop card
     const card = this.createCrewCard(shopCrew, true);
 
-    // Position in shop
+    // Position in shop - centered horizontally with spacing
     const shopIndex = this.shopContainer.list.length;
-    const x = 150 + shopIndex * 120;
+    const cardSpacing = 125;
+    const startX = 290; // Start position for first card
+    const x = startX + shopIndex * cardSpacing;
     card.setPosition(x, 150);
 
-    // Make clickable to buy - use setSize for Container hit area
-    card.setSize(100, 120);
-    card.setInteractive(new Phaser.Geom.Rectangle(-50, -60, 100, 120), Phaser.Geom.Rectangle.Contains);
+    // Make clickable to buy
+    card.setSize(110, 140);
+    card.setInteractive(new Phaser.Geom.Rectangle(-55, -70, 110, 140), Phaser.Geom.Rectangle.Contains);
     card.input!.cursor = 'pointer';
     card.on('pointerdown', () => this.buyCrewFromShop(shopCrew.id));
 
@@ -472,12 +495,12 @@ export default class ShipScene extends Phaser.Scene {
   }
 
   private gridToScreen(gridX: number, gridY: number): { x: number; y: number } {
-    const gridOffsetX = 200;
-    const gridOffsetY = 400;
-    const cellSize = 64;
+    const gridOffsetX = 232;
+    const gridOffsetY = 580;
+    const cellSize = 56;
     return {
-      x: gridOffsetX + gridX * cellSize + cellSize / 2,
-      y: gridOffsetY + gridY * cellSize + cellSize / 2,
+      x: gridOffsetX + gridX * cellSize,
+      y: gridOffsetY + gridY * cellSize,
     };
   }
 
