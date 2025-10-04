@@ -526,7 +526,10 @@ export default class ShipScene extends Phaser.Scene {
     // TODO: Switch to battle scene
   }
 
-  private getTraitDisplayName(trait: string): string {
+  private getTraitDisplayName(trait: any): string {
+    // Trait is an object with a 'tag' property
+    const traitTag = trait?.tag || trait;
+
     const traitMap: Record<string, string> = {
       'StrawHat': 'Straw Hat',
       'Marine': 'Marine',
@@ -536,7 +539,7 @@ export default class ShipScene extends Phaser.Scene {
       'Supernova': 'Supernova',
       'DFUser': 'DF User',
     };
-    return traitMap[trait] || trait;
+    return traitMap[traitTag] || traitTag;
   }
 
   private formatBerries(amount: number): string {
