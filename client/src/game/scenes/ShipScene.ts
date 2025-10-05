@@ -219,6 +219,31 @@ export default class ShipScene extends Phaser.Scene {
     const cols = 5;
     const rows = 3;
 
+    // Calculate raft dimensions
+    const raftWidth = cols * cellSize + 20;  // Extra padding
+    const raftHeight = rows * cellSize + 20;
+    const raftCenterX = gridStartX + (cols * cellSize) / 2 - cellSize / 2;
+    const raftCenterY = gridStartY + (rows * cellSize) / 2 - cellSize / 2;
+
+    // Draw raft border/frame around the grid
+    const raftBorder = this.add.rectangle(raftCenterX, raftCenterY, raftWidth, raftHeight)
+      .setStrokeStyle(6, 0x8b6914)  // Dark wood color
+      .setFillStyle(0xd4b896, 0.3);  // Semi-transparent light wood
+
+    // Add corner decorations (logs/beams)
+    const cornerSize = 12;
+    const halfWidth = raftWidth / 2;
+    const halfHeight = raftHeight / 2;
+
+    // Top-left corner
+    this.add.circle(raftCenterX - halfWidth, raftCenterY - halfHeight, cornerSize, 0x654321);
+    // Top-right corner
+    this.add.circle(raftCenterX + halfWidth, raftCenterY - halfHeight, cornerSize, 0x654321);
+    // Bottom-left corner
+    this.add.circle(raftCenterX - halfWidth, raftCenterY + halfHeight, cornerSize, 0x654321);
+    // Bottom-right corner
+    this.add.circle(raftCenterX + halfWidth, raftCenterY + halfHeight, cornerSize, 0x654321);
+
     // Draw ship grid (3x5 grid) - wooden deck style
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {

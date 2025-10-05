@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Read(//a/survive with friends branch/survive_with_friends/client/src/**)"
+      "Read(//a/survive with friends branch/survive_with_friends/client/src/**)",
+      "Read(//a/survive with friends branch/survive_with_friends/**)",
+      "Bash(cargo build:*)"
     ],
     "deny": [],
     "ask": []
