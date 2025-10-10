@@ -3,7 +3,16 @@
     "allow": [
       "Read(//a/survive with friends branch/survive_with_friends/client/src/**)",
       "Read(//a/survive with friends branch/survive_with_friends/**)",
-      "Bash(cargo build:*)"
+      "Bash(cargo build:*)",
+      "Bash(bun install:*)",
+      "Bash(bun add:*)",
+      "Bash(cat:*)",
+      "Bash(just admin:*)",
+      "WebFetch(domain:docs.spacetimedb.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(cargo test:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm install)"
     ],
     "deny": [],
     "ask": []
