@@ -15,7 +15,7 @@ export enum Environment {
  * Detect the current environment based on hostname and port
  */
 export function detectEnvironment(): Environment {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return Environment.Local;
   }
 
@@ -23,12 +23,12 @@ export function detectEnvironment(): Environment {
   const port = window.location.port;
 
   // Local development
-  if (hostname === 'localhost' || hostname === '127.0.0.1' || port === '3000') {
+  if (hostname === "localhost" || hostname === "127.0.0.1" || port === "3000") {
     return Environment.Local;
   }
 
   // Staging environment (customize based on your setup)
-  if (hostname.includes('staging') || hostname.includes('dev')) {
+  if (hostname.includes("staging") || hostname.includes("dev")) {
     return Environment.Staging;
   }
 
@@ -47,24 +47,27 @@ export function getSpacetimeConfig() {
       return {
         uri: LOCAL_SPACETIMEDB_URI,
         moduleName: SPACETIME_DB_DEV,
-        tokenKey: 'local_spacetime_token',
+        tokenKey: "local_spacetime_token",
         environment: env,
+        requireAuth: false, // No auth required in local development
       };
 
     case Environment.Staging:
       return {
         uri: STAGING_SPACETIMEDB_URI,
         moduleName: SPACETIME_DB_DEV,
-        tokenKey: 'staging_spacetime_token',
+        tokenKey: "staging_spacetime_token",
         environment: env,
+        requireAuth: true,
       };
 
     case Environment.Production:
       return {
         uri: REMOTE_SPACETIMEDB_URI,
         moduleName: SPACETIME_DB_LIVE,
-        tokenKey: 'spacetime_token',
+        tokenKey: "spacetime_token",
         environment: env,
+        requireAuth: true,
       };
   }
 }
@@ -96,7 +99,7 @@ export function clearToken(): void {
 // Log current configuration on import (dev only)
 if (import.meta.env.DEV) {
   const config = getSpacetimeConfig();
-  console.log('🚀 SpacetimeDB Config:', {
+  console.log("🚀 SpacetimeDB Config:", {
     environment: config.environment,
     uri: config.uri,
     module: config.moduleName,

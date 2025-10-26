@@ -25,7 +25,11 @@ import {
   type EventContextInterface as __EventContextInterface,
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
 } from "spacetimedb";
+import { CrewTrait } from "./crew_trait_type";
+// Mark import as potentially unused
+declare type __keep_CrewTrait = CrewTrait;
 import { ShipType } from "./ship_type_type";
 // Mark import as potentially unused
 declare type __keep_ShipType = ShipType;
@@ -40,7 +44,12 @@ export type Player = {
   losses: number,
   shipType: ShipType,
   online: boolean,
+  fightsCompleted: number,
+  activeTrait: CrewTrait | undefined,
+  traitLevel: number,
 };
+let _cached_Player_type_value: __AlgebraicTypeType | null = null;
+
 /**
  * An object for generated helper functions.
  */
@@ -50,18 +59,22 @@ export const Player = {
   * This function is derived from the AlgebraicType used to generate this type.
   */
   getTypeScriptAlgebraicType(): __AlgebraicTypeType {
-    return __AlgebraicTypeValue.Product({
-      elements: [
-        { name: "identity", algebraicType: __AlgebraicTypeValue.createIdentityType()},
-        { name: "name", algebraicType: __AlgebraicTypeValue.String},
-        { name: "berries", algebraicType: __AlgebraicTypeValue.U32},
-        { name: "bounty", algebraicType: __AlgebraicTypeValue.U32},
-        { name: "wins", algebraicType: __AlgebraicTypeValue.U32},
-        { name: "losses", algebraicType: __AlgebraicTypeValue.U32},
-        { name: "shipType", algebraicType: ShipType.getTypeScriptAlgebraicType()},
-        { name: "online", algebraicType: __AlgebraicTypeValue.Bool},
-      ]
-    });
+    if (_cached_Player_type_value) return _cached_Player_type_value;
+    _cached_Player_type_value = __AlgebraicTypeValue.Product({ elements: [] });
+    _cached_Player_type_value.value.elements.push(
+      { name: "identity", algebraicType: __AlgebraicTypeValue.createIdentityType() },
+      { name: "name", algebraicType: __AlgebraicTypeValue.String },
+      { name: "berries", algebraicType: __AlgebraicTypeValue.U32 },
+      { name: "bounty", algebraicType: __AlgebraicTypeValue.U32 },
+      { name: "wins", algebraicType: __AlgebraicTypeValue.U32 },
+      { name: "losses", algebraicType: __AlgebraicTypeValue.U32 },
+      { name: "shipType", algebraicType: ShipType.getTypeScriptAlgebraicType() },
+      { name: "online", algebraicType: __AlgebraicTypeValue.Bool },
+      { name: "fightsCompleted", algebraicType: __AlgebraicTypeValue.U32 },
+      { name: "activeTrait", algebraicType: __AlgebraicTypeValue.createOptionType(CrewTrait.getTypeScriptAlgebraicType()) },
+      { name: "traitLevel", algebraicType: __AlgebraicTypeValue.U32 },
+    );
+    return _cached_Player_type_value;
   },
 
   serialize(writer: __BinaryWriter, value: Player): void {

@@ -25,19 +25,20 @@ import {
   type EventContextInterface as __EventContextInterface,
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
 } from "spacetimedb";
-import { CrewRarity } from "./crew_rarity_type";
-// Mark import as potentially unused
-declare type __keep_CrewRarity = CrewRarity;
-import { CrewTrait } from "./crew_trait_type";
-// Mark import as potentially unused
-declare type __keep_CrewTrait = CrewTrait;
 import { ItemComponent } from "./item_component_type";
 // Mark import as potentially unused
 declare type __keep_ItemComponent = ItemComponent;
 import { CompletedItem } from "./completed_item_type";
 // Mark import as potentially unused
 declare type __keep_CompletedItem = CompletedItem;
+import { CrewRarity } from "./crew_rarity_type";
+// Mark import as potentially unused
+declare type __keep_CrewRarity = CrewRarity;
+import { CrewTrait } from "./crew_trait_type";
+// Mark import as potentially unused
+declare type __keep_CrewTrait = CrewTrait;
 
 
 export type Crew = {
@@ -57,6 +58,8 @@ export type Crew = {
   item2: ItemComponent | undefined,
   completedItem: CompletedItem | undefined,
 };
+let _cached_Crew_type_value: __AlgebraicTypeType | null = null;
+
 /**
  * An object for generated helper functions.
  */
@@ -66,25 +69,26 @@ export const Crew = {
   * This function is derived from the AlgebraicType used to generate this type.
   */
   getTypeScriptAlgebraicType(): __AlgebraicTypeType {
-    return __AlgebraicTypeValue.Product({
-      elements: [
-        { name: "id", algebraicType: __AlgebraicTypeValue.U64},
-        { name: "owner", algebraicType: __AlgebraicTypeValue.createIdentityType()},
-        { name: "name", algebraicType: __AlgebraicTypeValue.String},
-        { name: "rarity", algebraicType: CrewRarity.getTypeScriptAlgebraicType()},
-        { name: "trait1", algebraicType: CrewTrait.getTypeScriptAlgebraicType()},
-        { name: "trait2", algebraicType: __AlgebraicTypeValue.createOptionType(CrewTrait.getTypeScriptAlgebraicType())},
-        { name: "maxHp", algebraicType: __AlgebraicTypeValue.U32},
-        { name: "currentHp", algebraicType: __AlgebraicTypeValue.U32},
-        { name: "attack", algebraicType: __AlgebraicTypeValue.U32},
-        { name: "defense", algebraicType: __AlgebraicTypeValue.U32},
-        { name: "level", algebraicType: __AlgebraicTypeValue.U8},
-        { name: "slotIndex", algebraicType: __AlgebraicTypeValue.createOptionType(__AlgebraicTypeValue.U8)},
-        { name: "item1", algebraicType: __AlgebraicTypeValue.createOptionType(ItemComponent.getTypeScriptAlgebraicType())},
-        { name: "item2", algebraicType: __AlgebraicTypeValue.createOptionType(ItemComponent.getTypeScriptAlgebraicType())},
-        { name: "completedItem", algebraicType: __AlgebraicTypeValue.createOptionType(CompletedItem.getTypeScriptAlgebraicType())},
-      ]
-    });
+    if (_cached_Crew_type_value) return _cached_Crew_type_value;
+    _cached_Crew_type_value = __AlgebraicTypeValue.Product({ elements: [] });
+    _cached_Crew_type_value.value.elements.push(
+      { name: "id", algebraicType: __AlgebraicTypeValue.U64 },
+      { name: "owner", algebraicType: __AlgebraicTypeValue.createIdentityType() },
+      { name: "name", algebraicType: __AlgebraicTypeValue.String },
+      { name: "rarity", algebraicType: CrewRarity.getTypeScriptAlgebraicType() },
+      { name: "trait1", algebraicType: CrewTrait.getTypeScriptAlgebraicType() },
+      { name: "trait2", algebraicType: __AlgebraicTypeValue.createOptionType(CrewTrait.getTypeScriptAlgebraicType()) },
+      { name: "maxHp", algebraicType: __AlgebraicTypeValue.U32 },
+      { name: "currentHp", algebraicType: __AlgebraicTypeValue.U32 },
+      { name: "attack", algebraicType: __AlgebraicTypeValue.U32 },
+      { name: "defense", algebraicType: __AlgebraicTypeValue.U32 },
+      { name: "level", algebraicType: __AlgebraicTypeValue.U8 },
+      { name: "slotIndex", algebraicType: __AlgebraicTypeValue.createOptionType(__AlgebraicTypeValue.U8) },
+      { name: "item1", algebraicType: __AlgebraicTypeValue.createOptionType(ItemComponent.getTypeScriptAlgebraicType()) },
+      { name: "item2", algebraicType: __AlgebraicTypeValue.createOptionType(ItemComponent.getTypeScriptAlgebraicType()) },
+      { name: "completedItem", algebraicType: __AlgebraicTypeValue.createOptionType(CompletedItem.getTypeScriptAlgebraicType()) },
+    );
+    return _cached_Crew_type_value;
   },
 
   serialize(writer: __BinaryWriter, value: Crew): void {

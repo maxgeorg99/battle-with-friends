@@ -25,6 +25,7 @@ import {
   type EventContextInterface as __EventContextInterface,
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
 } from "spacetimedb";
 import * as CrewRarityVariants from './crew_rarity_variants'
 
@@ -33,6 +34,8 @@ export type CrewRarity = CrewRarityVariants.Common |
   CrewRarityVariants.Rare |
   CrewRarityVariants.Epic |
   CrewRarityVariants.Legendary;
+
+let _cached_CrewRarity_type_value: __AlgebraicTypeType | null = null;
 
 // A value with helper functions to construct the type.
 export const CrewRarity = {
@@ -48,14 +51,15 @@ export const CrewRarity = {
   Legendary: { tag: "Legendary" } as const,
 
   getTypeScriptAlgebraicType(): __AlgebraicTypeType {
-    return __AlgebraicTypeValue.Sum({
-      variants: [
-        { name: "Common", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "Rare", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "Epic", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "Legendary", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-      ]
-    });
+    if (_cached_CrewRarity_type_value) return _cached_CrewRarity_type_value;
+    _cached_CrewRarity_type_value = __AlgebraicTypeValue.Sum({ variants: [] });
+    _cached_CrewRarity_type_value.value.variants.push(
+      { name: "Common", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "Rare", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "Epic", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "Legendary", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+    );
+    return _cached_CrewRarity_type_value;
   },
 
   serialize(writer: __BinaryWriter, value: CrewRarity): void {

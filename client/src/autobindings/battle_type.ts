@@ -25,6 +25,7 @@ import {
   type EventContextInterface as __EventContextInterface,
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
 } from "spacetimedb";
 import { BattleStatus } from "./battle_status_type";
 // Mark import as potentially unused
@@ -39,7 +40,11 @@ export type Battle = {
   status: BattleStatus,
   turn: number,
   bountyReward: number,
+  player1Bounty: number,
+  player2Bounty: number,
 };
+let _cached_Battle_type_value: __AlgebraicTypeType | null = null;
+
 /**
  * An object for generated helper functions.
  */
@@ -49,17 +54,20 @@ export const Battle = {
   * This function is derived from the AlgebraicType used to generate this type.
   */
   getTypeScriptAlgebraicType(): __AlgebraicTypeType {
-    return __AlgebraicTypeValue.Product({
-      elements: [
-        { name: "id", algebraicType: __AlgebraicTypeValue.U64},
-        { name: "player1", algebraicType: __AlgebraicTypeValue.createIdentityType()},
-        { name: "player2", algebraicType: __AlgebraicTypeValue.createOptionType(__AlgebraicTypeValue.createIdentityType())},
-        { name: "winner", algebraicType: __AlgebraicTypeValue.createOptionType(__AlgebraicTypeValue.createIdentityType())},
-        { name: "status", algebraicType: BattleStatus.getTypeScriptAlgebraicType()},
-        { name: "turn", algebraicType: __AlgebraicTypeValue.U32},
-        { name: "bountyReward", algebraicType: __AlgebraicTypeValue.U32},
-      ]
-    });
+    if (_cached_Battle_type_value) return _cached_Battle_type_value;
+    _cached_Battle_type_value = __AlgebraicTypeValue.Product({ elements: [] });
+    _cached_Battle_type_value.value.elements.push(
+      { name: "id", algebraicType: __AlgebraicTypeValue.U64 },
+      { name: "player1", algebraicType: __AlgebraicTypeValue.createIdentityType() },
+      { name: "player2", algebraicType: __AlgebraicTypeValue.createOptionType(__AlgebraicTypeValue.createIdentityType()) },
+      { name: "winner", algebraicType: __AlgebraicTypeValue.createOptionType(__AlgebraicTypeValue.createIdentityType()) },
+      { name: "status", algebraicType: BattleStatus.getTypeScriptAlgebraicType() },
+      { name: "turn", algebraicType: __AlgebraicTypeValue.U32 },
+      { name: "bountyReward", algebraicType: __AlgebraicTypeValue.U32 },
+      { name: "player1Bounty", algebraicType: __AlgebraicTypeValue.U32 },
+      { name: "player2Bounty", algebraicType: __AlgebraicTypeValue.U32 },
+    );
+    return _cached_Battle_type_value;
   },
 
   serialize(writer: __BinaryWriter, value: Battle): void {

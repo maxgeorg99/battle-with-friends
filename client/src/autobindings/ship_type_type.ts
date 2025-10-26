@@ -25,13 +25,24 @@ import {
   type EventContextInterface as __EventContextInterface,
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
 } from "spacetimedb";
 import * as ShipTypeVariants from './ship_type_variants'
 
 // The tagged union or sum type for the algebraic type `ShipType`.
 export type ShipType = ShipTypeVariants.Raft |
-  ShipTypeVariants.GoingMerry |
-  ShipTypeVariants.ThousandSunny;
+  ShipTypeVariants.FlyingLamb |
+  ShipTypeVariants.MarineShip |
+  ShipTypeVariants.RevolutionaryShip |
+  ShipTypeVariants.GiantShip |
+  ShipTypeVariants.RedForce |
+  ShipTypeVariants.ThousandSunny |
+  ShipTypeVariants.GarpsShip |
+  ShipTypeVariants.RevolutionaryBattleship |
+  ShipTypeVariants.GiantWarship |
+  ShipTypeVariants.RedForceUpgraded;
+
+let _cached_ShipType_type_value: __AlgebraicTypeType | null = null;
 
 // A value with helper functions to construct the type.
 export const ShipType = {
@@ -42,17 +53,34 @@ export const ShipType = {
   // assert!(foo.value === 42);
   // ```
   Raft: { tag: "Raft" } as const,
-  GoingMerry: { tag: "GoingMerry" } as const,
+  FlyingLamb: { tag: "FlyingLamb" } as const,
+  MarineShip: { tag: "MarineShip" } as const,
+  RevolutionaryShip: { tag: "RevolutionaryShip" } as const,
+  GiantShip: { tag: "GiantShip" } as const,
+  RedForce: { tag: "RedForce" } as const,
   ThousandSunny: { tag: "ThousandSunny" } as const,
+  GarpsShip: { tag: "GarpsShip" } as const,
+  RevolutionaryBattleship: { tag: "RevolutionaryBattleship" } as const,
+  GiantWarship: { tag: "GiantWarship" } as const,
+  RedForceUpgraded: { tag: "RedForceUpgraded" } as const,
 
   getTypeScriptAlgebraicType(): __AlgebraicTypeType {
-    return __AlgebraicTypeValue.Sum({
-      variants: [
-        { name: "Raft", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "GoingMerry", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "ThousandSunny", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-      ]
-    });
+    if (_cached_ShipType_type_value) return _cached_ShipType_type_value;
+    _cached_ShipType_type_value = __AlgebraicTypeValue.Sum({ variants: [] });
+    _cached_ShipType_type_value.value.variants.push(
+      { name: "Raft", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "FlyingLamb", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "MarineShip", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "RevolutionaryShip", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "GiantShip", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "RedForce", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "ThousandSunny", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "GarpsShip", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "RevolutionaryBattleship", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "GiantWarship", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "RedForceUpgraded", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+    );
+    return _cached_ShipType_type_value;
   },
 
   serialize(writer: __BinaryWriter, value: ShipType): void {

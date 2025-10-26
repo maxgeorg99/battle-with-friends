@@ -25,6 +25,7 @@ import {
   type EventContextInterface as __EventContextInterface,
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
 } from "spacetimedb";
 import * as ItemComponentVariants from './item_component_variants'
 
@@ -37,6 +38,8 @@ export type ItemComponent = ItemComponentVariants.Cutlass |
   ItemComponentVariants.TidalCloak |
   ItemComponentVariants.EnergyDrink |
   ItemComponentVariants.Meat;
+
+let _cached_ItemComponent_type_value: __AlgebraicTypeType | null = null;
 
 // A value with helper functions to construct the type.
 export const ItemComponent = {
@@ -56,18 +59,19 @@ export const ItemComponent = {
   Meat: { tag: "Meat" } as const,
 
   getTypeScriptAlgebraicType(): __AlgebraicTypeType {
-    return __AlgebraicTypeValue.Sum({
-      variants: [
-        { name: "Cutlass", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "SniperGoggles", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "ShellDial", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "ToneDial", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "SeastoneFragment", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "TidalCloak", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "EnergyDrink", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "Meat", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-      ]
-    });
+    if (_cached_ItemComponent_type_value) return _cached_ItemComponent_type_value;
+    _cached_ItemComponent_type_value = __AlgebraicTypeValue.Sum({ variants: [] });
+    _cached_ItemComponent_type_value.value.variants.push(
+      { name: "Cutlass", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "SniperGoggles", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "ShellDial", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "ToneDial", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "SeastoneFragment", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "TidalCloak", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "EnergyDrink", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "Meat", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+    );
+    return _cached_ItemComponent_type_value;
   },
 
   serialize(writer: __BinaryWriter, value: ItemComponent): void {

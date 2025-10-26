@@ -25,6 +25,7 @@ import {
   type EventContextInterface as __EventContextInterface,
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
 } from "spacetimedb";
 import { PlayerItem } from "./player_item_type";
 import { ItemComponent } from "./item_component_type";
@@ -44,7 +45,9 @@ declare type __keep = [EventContext, Reducer, RemoteReducers, RemoteTables];
  * but to directly chain method calls,
  * like `ctx.db.playerItem.on_insert(...)`.
  */
-export class PlayerItemTableHandle {
+export class PlayerItemTableHandle<TableName extends string> implements __TableHandle<TableName> {
+  // phantom type to track the table name
+  readonly tableName!: TableName;
   tableCache: __TableCache<PlayerItem>;
 
   constructor(tableCache: __TableCache<PlayerItem>) {

@@ -25,8 +25,12 @@ import {
   type EventContextInterface as __EventContextInterface,
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
 } from "spacetimedb";
 import { Player } from "./player_type";
+import { CrewTrait } from "./crew_trait_type";
+// Mark import as potentially unused
+declare type __keep_CrewTrait = CrewTrait;
 import { ShipType } from "./ship_type_type";
 // Mark import as potentially unused
 declare type __keep_ShipType = ShipType;
@@ -44,7 +48,9 @@ declare type __keep = [EventContext, Reducer, RemoteReducers, RemoteTables];
  * but to directly chain method calls,
  * like `ctx.db.player.on_insert(...)`.
  */
-export class PlayerTableHandle {
+export class PlayerTableHandle<TableName extends string> implements __TableHandle<TableName> {
+  // phantom type to track the table name
+  readonly tableName!: TableName;
   tableCache: __TableCache<Player>;
 
   constructor(tableCache: __TableCache<Player>) {

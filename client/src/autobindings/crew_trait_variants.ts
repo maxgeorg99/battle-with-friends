@@ -25,13 +25,19 @@ import {
   type EventContextInterface as __EventContextInterface,
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
 } from "spacetimedb";
 
 export type StrawHat = { tag: "StrawHat" };
 export type Marine = { tag: "Marine" };
 export type Revolutionary = { tag: "Revolutionary" };
-export type Warlord = { tag: "Warlord" };
-export type Emperor = { tag: "Emperor" };
-export type Supernova = { tag: "Supernova" };
+export type RedHairPirates = { tag: "RedHairPirates" };
+export type Giants = { tag: "Giants" };
+export type HolyKnights = { tag: "HolyKnights" };
+export type FiveElders = { tag: "FiveElders" };
+export type Logia = { tag: "Logia" };
+export type Paramecia = { tag: "Paramecia" };
+export type Zoan = { tag: "Zoan" };
+export type Sword = { tag: "Sword" };
 export type DfUser = { tag: "DfUser" };
 

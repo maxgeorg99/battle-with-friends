@@ -25,6 +25,7 @@ import {
   type EventContextInterface as __EventContextInterface,
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
 } from "spacetimedb";
 import * as CompletedItemVariants from './completed_item_variants'
 
@@ -44,6 +45,8 @@ export type CompletedItem = CompletedItemVariants.Yoru |
   CompletedItemVariants.GumGumFruit |
   CompletedItemVariants.GomuGomuNoMi |
   CompletedItemVariants.HakiMastery;
+
+let _cached_CompletedItem_type_value: __AlgebraicTypeType | null = null;
 
 // A value with helper functions to construct the type.
 export const CompletedItem = {
@@ -70,25 +73,26 @@ export const CompletedItem = {
   HakiMastery: { tag: "HakiMastery" } as const,
 
   getTypeScriptAlgebraicType(): __AlgebraicTypeType {
-    return __AlgebraicTypeValue.Sum({
-      variants: [
-        { name: "Yoru", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "Kabuto", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "Shusui", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "ClimaTact", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "ThunderTempo", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "MirageFlower", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "AdamWood", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "SeaKingScale", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "ThousandSunnyHull", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "VivrCard", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "LogPose", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "Poneglyph", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "GumGumFruit", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "GomuGomuNoMi", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "HakiMastery", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-      ]
-    });
+    if (_cached_CompletedItem_type_value) return _cached_CompletedItem_type_value;
+    _cached_CompletedItem_type_value = __AlgebraicTypeValue.Sum({ variants: [] });
+    _cached_CompletedItem_type_value.value.variants.push(
+      { name: "Yoru", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "Kabuto", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "Shusui", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "ClimaTact", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "ThunderTempo", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "MirageFlower", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "AdamWood", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "SeaKingScale", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "ThousandSunnyHull", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "VivrCard", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "LogPose", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "Poneglyph", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "GumGumFruit", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "GomuGomuNoMi", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "HakiMastery", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+    );
+    return _cached_CompletedItem_type_value;
   },
 
   serialize(writer: __BinaryWriter, value: CompletedItem): void {

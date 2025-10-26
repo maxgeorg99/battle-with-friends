@@ -25,6 +25,7 @@ import {
   type EventContextInterface as __EventContextInterface,
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
 } from "spacetimedb";
 import * as CrewTraitVariants from './crew_trait_variants'
 
@@ -32,10 +33,17 @@ import * as CrewTraitVariants from './crew_trait_variants'
 export type CrewTrait = CrewTraitVariants.StrawHat |
   CrewTraitVariants.Marine |
   CrewTraitVariants.Revolutionary |
-  CrewTraitVariants.Warlord |
-  CrewTraitVariants.Emperor |
-  CrewTraitVariants.Supernova |
+  CrewTraitVariants.RedHairPirates |
+  CrewTraitVariants.Giants |
+  CrewTraitVariants.HolyKnights |
+  CrewTraitVariants.FiveElders |
+  CrewTraitVariants.Logia |
+  CrewTraitVariants.Paramecia |
+  CrewTraitVariants.Zoan |
+  CrewTraitVariants.Sword |
   CrewTraitVariants.DfUser;
+
+let _cached_CrewTrait_type_value: __AlgebraicTypeType | null = null;
 
 // A value with helper functions to construct the type.
 export const CrewTrait = {
@@ -48,23 +56,34 @@ export const CrewTrait = {
   StrawHat: { tag: "StrawHat" } as const,
   Marine: { tag: "Marine" } as const,
   Revolutionary: { tag: "Revolutionary" } as const,
-  Warlord: { tag: "Warlord" } as const,
-  Emperor: { tag: "Emperor" } as const,
-  Supernova: { tag: "Supernova" } as const,
+  RedHairPirates: { tag: "RedHairPirates" } as const,
+  Giants: { tag: "Giants" } as const,
+  HolyKnights: { tag: "HolyKnights" } as const,
+  FiveElders: { tag: "FiveElders" } as const,
+  Logia: { tag: "Logia" } as const,
+  Paramecia: { tag: "Paramecia" } as const,
+  Zoan: { tag: "Zoan" } as const,
+  Sword: { tag: "Sword" } as const,
   DFUser: { tag: "DFUser" } as const,
 
   getTypeScriptAlgebraicType(): __AlgebraicTypeType {
-    return __AlgebraicTypeValue.Sum({
-      variants: [
-        { name: "StrawHat", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "Marine", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "Revolutionary", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "Warlord", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "Emperor", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "Supernova", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "DFUser", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-      ]
-    });
+    if (_cached_CrewTrait_type_value) return _cached_CrewTrait_type_value;
+    _cached_CrewTrait_type_value = __AlgebraicTypeValue.Sum({ variants: [] });
+    _cached_CrewTrait_type_value.value.variants.push(
+      { name: "StrawHat", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "Marine", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "Revolutionary", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "RedHairPirates", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "Giants", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "HolyKnights", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "FiveElders", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "Logia", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "Paramecia", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "Zoan", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "Sword", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "DFUser", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+    );
+    return _cached_CrewTrait_type_value;
   },
 
   serialize(writer: __BinaryWriter, value: CrewTrait): void {

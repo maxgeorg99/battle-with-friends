@@ -25,12 +25,15 @@ import {
   type EventContextInterface as __EventContextInterface,
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
 } from "spacetimedb";
 
 export type BuyCrew = {
   shopCrewId: bigint,
   slotIndex: number | undefined,
 };
+let _cached_BuyCrew_type_value: __AlgebraicTypeType | null = null;
+
 /**
  * An object for generated helper functions.
  */
@@ -40,12 +43,13 @@ export const BuyCrew = {
   * This function is derived from the AlgebraicType used to generate this type.
   */
   getTypeScriptAlgebraicType(): __AlgebraicTypeType {
-    return __AlgebraicTypeValue.Product({
-      elements: [
-        { name: "shopCrewId", algebraicType: __AlgebraicTypeValue.U64},
-        { name: "slotIndex", algebraicType: __AlgebraicTypeValue.createOptionType(__AlgebraicTypeValue.U8)},
-      ]
-    });
+    if (_cached_BuyCrew_type_value) return _cached_BuyCrew_type_value;
+    _cached_BuyCrew_type_value = __AlgebraicTypeValue.Product({ elements: [] });
+    _cached_BuyCrew_type_value.value.elements.push(
+      { name: "shopCrewId", algebraicType: __AlgebraicTypeValue.U64 },
+      { name: "slotIndex", algebraicType: __AlgebraicTypeValue.createOptionType(__AlgebraicTypeValue.U8) },
+    );
+    return _cached_BuyCrew_type_value;
   },
 
   serialize(writer: __BinaryWriter, value: BuyCrew): void {

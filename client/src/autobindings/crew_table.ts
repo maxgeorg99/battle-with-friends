@@ -25,20 +25,21 @@ import {
   type EventContextInterface as __EventContextInterface,
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
 } from "spacetimedb";
 import { Crew } from "./crew_type";
-import { CrewRarity } from "./crew_rarity_type";
-// Mark import as potentially unused
-declare type __keep_CrewRarity = CrewRarity;
-import { CrewTrait } from "./crew_trait_type";
-// Mark import as potentially unused
-declare type __keep_CrewTrait = CrewTrait;
 import { ItemComponent } from "./item_component_type";
 // Mark import as potentially unused
 declare type __keep_ItemComponent = ItemComponent;
 import { CompletedItem } from "./completed_item_type";
 // Mark import as potentially unused
 declare type __keep_CompletedItem = CompletedItem;
+import { CrewRarity } from "./crew_rarity_type";
+// Mark import as potentially unused
+declare type __keep_CrewRarity = CrewRarity;
+import { CrewTrait } from "./crew_trait_type";
+// Mark import as potentially unused
+declare type __keep_CrewTrait = CrewTrait;
 
 import { type EventContext, type Reducer, RemoteReducers, RemoteTables } from ".";
 declare type __keep = [EventContext, Reducer, RemoteReducers, RemoteTables];
@@ -53,7 +54,9 @@ declare type __keep = [EventContext, Reducer, RemoteReducers, RemoteTables];
  * but to directly chain method calls,
  * like `ctx.db.crew.on_insert(...)`.
  */
-export class CrewTableHandle {
+export class CrewTableHandle<TableName extends string> implements __TableHandle<TableName> {
+  // phantom type to track the table name
+  readonly tableName!: TableName;
   tableCache: __TableCache<Crew>;
 
   constructor(tableCache: __TableCache<Crew>) {

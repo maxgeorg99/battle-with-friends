@@ -25,6 +25,7 @@ import {
   type EventContextInterface as __EventContextInterface,
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
 } from "spacetimedb";
 import * as BattleStatusVariants from './battle_status_variants'
 
@@ -32,6 +33,8 @@ import * as BattleStatusVariants from './battle_status_variants'
 export type BattleStatus = BattleStatusVariants.WaitingForOpponent |
   BattleStatusVariants.InProgress |
   BattleStatusVariants.Finished;
+
+let _cached_BattleStatus_type_value: __AlgebraicTypeType | null = null;
 
 // A value with helper functions to construct the type.
 export const BattleStatus = {
@@ -46,13 +49,14 @@ export const BattleStatus = {
   Finished: { tag: "Finished" } as const,
 
   getTypeScriptAlgebraicType(): __AlgebraicTypeType {
-    return __AlgebraicTypeValue.Sum({
-      variants: [
-        { name: "WaitingForOpponent", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "InProgress", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-        { name: "Finished", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
-      ]
-    });
+    if (_cached_BattleStatus_type_value) return _cached_BattleStatus_type_value;
+    _cached_BattleStatus_type_value = __AlgebraicTypeValue.Sum({ variants: [] });
+    _cached_BattleStatus_type_value.value.variants.push(
+      { name: "WaitingForOpponent", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "InProgress", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+      { name: "Finished", algebraicType: __AlgebraicTypeValue.Product({ elements: [] }) },
+    );
+    return _cached_BattleStatus_type_value;
   },
 
   serialize(writer: __BinaryWriter, value: BattleStatus): void {

@@ -25,9 +25,18 @@ import {
   type EventContextInterface as __EventContextInterface,
   type ReducerEventContextInterface as __ReducerEventContextInterface,
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
 } from "spacetimedb";
 
 export type Raft = { tag: "Raft" };
-export type GoingMerry = { tag: "GoingMerry" };
+export type FlyingLamb = { tag: "FlyingLamb" };
+export type MarineShip = { tag: "MarineShip" };
+export type RevolutionaryShip = { tag: "RevolutionaryShip" };
+export type GiantShip = { tag: "GiantShip" };
+export type RedForce = { tag: "RedForce" };
 export type ThousandSunny = { tag: "ThousandSunny" };
+export type GarpsShip = { tag: "GarpsShip" };
+export type RevolutionaryBattleship = { tag: "RevolutionaryBattleship" };
+export type GiantWarship = { tag: "GiantWarship" };
+export type RedForceUpgraded = { tag: "RedForceUpgraded" };
 

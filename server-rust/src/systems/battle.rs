@@ -1,22 +1,36 @@
-use spacetimedb::{ReducerContext, Table, log, rand::Rng};
-use std::time::Duration;
-use crate::types::*;
-use crate::tables::*;
 use crate::systems::collision::*;
+use crate::tables::*;
+use crate::types::*;
+use spacetimedb::{log, rand::Rng, ReducerContext, Table};
+use std::time::Duration;
 
 /// Start a battle and create BattleUnits from Crew
-pub fn start_battle(ctx: &ReducerContext, battle_id: u64, player1: spacetimedb::Identity, player2: spacetimedb::Identity) {
-    log::info!("Starting battle {} between {} and {}", battle_id, player1, player2);
+pub fn start_battle(
+    ctx: &ReducerContext,
+    battle_id: u64,
+    player1: spacetimedb::Identity,
+    player2: spacetimedb::Identity,
+) {
+    log::info!(
+        "Starting battle {} between {} and {}",
+        battle_id,
+        player1,
+        player2
+    );
 
     // Get all crew members for player1 with slot_index (on the field)
-    let player1_crew: Vec<_> = ctx.db.crew()
+    let player1_crew: Vec<_> = ctx
+        .db
+        .crew()
         .owner()
         .filter(&player1)
         .filter(|c| c.slot_index.is_some())
         .collect();
 
     // Get all crew members for player2
-    let player2_crew: Vec<_> = ctx.db.crew()
+    let player2_crew: Vec<_> = ctx
+        .db
+        .crew()
         .owner()
         .filter(&player2)
         .filter(|c| c.slot_index.is_some())
@@ -37,8 +51,12 @@ pub fn start_battle(ctx: &ReducerContext, battle_id: u64, player1: spacetimedb::
     // Schedule the first battle tick
     schedule_battle_tick(ctx, battle_id);
 
-    log::info!("Battle {} started with {} vs {} units",
-        battle_id, player1_crew.len(), player2_crew.len());
+    log::info!(
+        "Battle {} started with {} vs {} units",
+        battle_id,
+        player1_crew.len(),
+        player2_crew.len()
+    );
 }
 
 /// Get spawn position for a unit based on index and side
@@ -67,7 +85,8 @@ fn create_battle_unit(
     position: DbVector2,
 ) {
     // Calculate stats with item bonuses
-    let (total_stats, crit_chance, crit_damage, attack_speed, max_mana) = calculate_unit_stats(ctx, crew);
+    let (total_stats, crit_chance, crit_damage, attack_speed, max_mana) =
+        calculate_unit_stats(ctx, crew);
 
     let mut unit = BattleUnit {
         id: 0,
@@ -89,7 +108,7 @@ fn create_battle_unit(
         crit_damage,
         max_mana,
         current_mana: max_mana, // Start with full mana
-        mana_per_attack: 20, // Gain 20 mana per attack
+        mana_per_attack: 20,    // Gain 20 mana per attack
         attack_cooldown: 0.0,
         target_unit_id: None,
         ability_ready: false,
@@ -167,7 +186,13 @@ fn calculate_unit_stats(ctx: &ReducerContext, crew: &Crew) -> (UnitStats, f32, f
         }
     }
 
-    let stats = UnitStats { hp, ad, armor, ap, mr };
+    let stats = UnitStats {
+        hp,
+        ad,
+        armor,
+        ap,
+        mr,
+    };
     (stats, crit_chance, crit_damage, attack_speed, max_mana)
 }
 
@@ -176,7 +201,7 @@ fn schedule_battle_tick(ctx: &ReducerContext, battle_id: u64) {
     ctx.db.battle_tick_timer().insert(BattleTickTimer {
         scheduled_id: 0,
         scheduled_at: spacetimedb::ScheduleAt::Time(
-            ctx.timestamp + Duration::from_millis((1000 / BATTLE_TICK_RATE) as u64)
+            ctx.timestamp + Duration::from_millis((1000 / BATTLE_TICK_RATE) as u64),
         ),
         battle_id,
     });
@@ -298,7 +323,7 @@ fn process_unit_ai_and_combat(ctx: &ReducerContext, cache: &mut BattleCollisionC
         if let Some(target_idx) = target_idx {
             // Attack if cooldown ready
             if unit.attack_cooldown <= 0.0 {
-                let damage = calculate_damage(&unit, cache, target_idx);
+                let damage = calculate_damage(ctx, &unit, cache, target_idx);
                 cache.damage_to_unit[target_idx] += damage;
 
                 // Gain mana
@@ -319,11 +344,16 @@ fn process_unit_ai_and_combat(ctx: &ReducerContext, cache: &mut BattleCollisionC
 }
 
 /// Calculate damage from attacker to target
-fn calculate_damage(attacker: &BattleUnit, cache: &BattleCollisionCache, target_idx: usize) -> u32 {
+fn calculate_damage(
+    ctx: &ReducerContext,
+    attacker: &BattleUnit,
+    cache: &BattleCollisionCache,
+    target_idx: usize,
+) -> u32 {
     let mut damage = attacker.attack as f32;
 
     // Check for critical hit
-    let mut rng = spacetimedb::rand::thread_rng();
+    let mut rng = ctx.rng();
     if rng.gen::<f32>() < attacker.crit_chance {
         damage *= attacker.crit_damage;
     }
@@ -346,13 +376,9 @@ fn process_unit_movement(ctx: &ReducerContext, cache: &BattleCollisionCache) {
         };
 
         // Find nearest enemy to move toward
-        if let Some(target_idx) = find_nearest_enemy(
-            cache,
-            cache.pos_x[i],
-            cache.pos_y[i],
-            cache.side[i],
-            2000.0,
-        ) {
+        if let Some(target_idx) =
+            find_nearest_enemy(cache, cache.pos_x[i], cache.pos_y[i], cache.side[i], 2000.0)
+        {
             let dx = cache.pos_x[target_idx] - cache.pos_x[i];
             let dy = cache.pos_y[target_idx] - cache.pos_y[i];
             let dist = (dx * dx + dy * dy).sqrt();
@@ -366,8 +392,14 @@ fn process_unit_movement(ctx: &ReducerContext, cache: &BattleCollisionCache) {
                 unit.position.y += dir_y * move_speed;
 
                 // Clamp to arena bounds
-                unit.position.x = unit.position.x.clamp(unit.radius, BATTLE_ARENA_SIZE - unit.radius);
-                unit.position.y = unit.position.y.clamp(unit.radius, BATTLE_ARENA_SIZE - unit.radius);
+                unit.position.x = unit
+                    .position
+                    .x
+                    .clamp(unit.radius, BATTLE_ARENA_SIZE - unit.radius);
+                unit.position.y = unit
+                    .position
+                    .y
+                    .clamp(unit.radius, BATTLE_ARENA_SIZE - unit.radius);
             }
         }
 
@@ -376,7 +408,11 @@ fn process_unit_movement(ctx: &ReducerContext, cache: &BattleCollisionCache) {
 }
 
 /// Commit damage and remove dead units
-fn commit_damage_and_check_deaths(ctx: &ReducerContext, battle_id: u64, cache: &BattleCollisionCache) {
+fn commit_damage_and_check_deaths(
+    ctx: &ReducerContext,
+    battle_id: u64,
+    cache: &BattleCollisionCache,
+) {
     for i in 0..cache.cached_count {
         let damage = cache.damage_to_unit[i];
         if damage == 0 {
