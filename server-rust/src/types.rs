@@ -1,5 +1,4 @@
 use spacetimedb::SpacetimeType;
-
 // ========== MATH TYPES ==========
 
 #[derive(SpacetimeType, Clone, Copy, Debug, PartialEq)]
@@ -65,84 +64,29 @@ impl std::ops::Mul<f32> for DbVector2 {
 pub enum ShipType {
     // Starter ships (0-2 units of a trait)
     Raft,              // Default starter
-
-    // Tier 1 ships (3-5 units of a trait)
-    FlyingLamb,        // Straw Hat Pirates (Going Merry equivalent)
-    MarineShip,        // Marines
-    RevolutionaryShip, // Revolutionary Army
-    GiantShip,         // Giants
+    ThousandSunny,     // Straw Hat Pirates
     RedForce,          // Red Hair Pirates
-
-    // Tier 2 ships (6+ units of a trait)
-    ThousandSunny,     // Straw Hat Pirates (upgraded)
-    GarpsShip,         // Marines (upgraded)
-    RevolutionaryBattleship, // Revolutionary Army (upgraded)
-    GiantWarship,      // Giants (upgraded)
-    RedForceUpgraded,  // Red Hair Pirates (upgraded)
+    Naglfar,           // Giants
+    SaberOfXebec,      //Blackbeared
+    PolarTang,         //Hear Pirates
+    BigTopBlaster,     //Cross guid
+    MobyDick,          //Whitebeared Pirates
+    QueenMama,         //Big mom Pirates
 }
 
 impl ShipType {
-    /// Get ship based on active trait and trait level
-    pub fn from_trait_and_level(active_trait: Option<CrewTrait>, trait_level: u32) -> Self {
-        match (active_trait, trait_level) {
-            // No trait or low level = Raft
-            (None, _) | (_, 0..=2) => ShipType::Raft,
-
-            // Tier 1: 3-5 units
-            (Some(CrewTrait::StrawHat), 3..=5) => ShipType::FlyingLamb,
-            (Some(CrewTrait::Marine), 3..=5) => ShipType::MarineShip,
-            (Some(CrewTrait::Revolutionary), 3..=5) => ShipType::RevolutionaryShip,
-            (Some(CrewTrait::Giants), 3..=5) => ShipType::GiantShip,
-            (Some(CrewTrait::RedHairPirates), 3..=5) => ShipType::RedForce,
-
-            // Tier 2: 6+ units
-            (Some(CrewTrait::StrawHat), 6..) => ShipType::ThousandSunny,
-            (Some(CrewTrait::Marine), 6..) => ShipType::GarpsShip,
-            (Some(CrewTrait::Revolutionary), 6..) => ShipType::RevolutionaryBattleship,
-            (Some(CrewTrait::Giants), 6..) => ShipType::GiantWarship,
-            (Some(CrewTrait::RedHairPirates), 6..) => ShipType::RedForceUpgraded,
-
-            // Other traits default to generic ships
-            (Some(_), 3..=5) => ShipType::FlyingLamb,
-            (Some(_), 6..) => ShipType::ThousandSunny,
-        }
-    }
-
-    /// Get max crew slots for this ship
-    pub fn max_crew_size(&self) -> u8 {
-        match self {
-            ShipType::Raft => 5,
-
-            // Tier 1 ships: 10 crew slots
-            ShipType::FlyingLamb
-            | ShipType::MarineShip
-            | ShipType::RevolutionaryShip
-            | ShipType::GiantShip
-            | ShipType::RedForce => 10,
-
-            // Tier 2 ships: 15 crew slots
-            ShipType::ThousandSunny
-            | ShipType::GarpsShip
-            | ShipType::RevolutionaryBattleship
-            | ShipType::GiantWarship
-            | ShipType::RedForceUpgraded => 15,
-        }
-    }
-
     /// Get asset filename for this ship
     pub fn asset_filename(&self) -> &'static str {
         match self {
-            ShipType::Raft => "raft.png", // You'll need to add this
-            ShipType::FlyingLamb => "FlyingLamb.jpeg",
-            ShipType::MarineShip => "MarineShip.jpeg",
-            ShipType::RevolutionaryShip => "MarineShip.jpeg", // TODO: Add revolutionary ship asset
-            ShipType::GiantShip => "MarineShip.jpeg", // TODO: Add giant ship asset
-            ShipType::RedForce => "RedForce.jpeg",
-            ShipType::ThousandSunny => "sunny.jpeg",
-            ShipType::GarpsShip => "GarpsShip.jpeg",
-            ShipType::RevolutionaryBattleship => "GarpsShip.jpeg", // TODO: Add revolutionary battleship
-            ShipType::GiantWarship => "GarpsShip.jpeg", // TODO: Add giant warship
-            ShipType::RedForceUpgraded => "RedForce.jpeg", // Could be same or different
+            ShipType::Raft => "Raft.png",
+            ShipType::RedForce => "RedForce.png",
+            ShipType::ThousandSunny => "Sunny.png",
+            ShipType::Naglfar => "Naglfar.png",
+            ShipType::SaberOfXebec => "SaberOfXebec.png",
+            ShipType::PolarTang => "PolarTang.png",
+            ShipType::BigTopBlaster => "BigTopBlaster.png",
+            ShipType::MobyDick => "MobyDick.png",
+            ShipType::QueenMama => "QueenMama.png",
         }
     }
 
@@ -150,67 +94,78 @@ impl ShipType {
     pub fn display_name(&self) -> &'static str {
         match self {
             ShipType::Raft => "Raft",
-            ShipType::FlyingLamb => "Going Merry (Flying Lamb)",
-            ShipType::MarineShip => "Marine Warship",
-            ShipType::RevolutionaryShip => "Revolutionary Ship",
-            ShipType::GiantShip => "Giant Longship",
             ShipType::RedForce => "Red Force",
             ShipType::ThousandSunny => "Thousand Sunny",
-            ShipType::GarpsShip => "Garp's Battleship",
-            ShipType::RevolutionaryBattleship => "Revolutionary Battleship",
-            ShipType::GiantWarship => "Giant Warship",
-            ShipType::RedForceUpgraded => "Red Force (Upgraded)",
+            ShipType::Naglfar => "Naglfar",
+            ShipType::SaberOfXebec => "Saber Of Xebec",
+            ShipType::PolarTang => "Polar Tang",
+            ShipType::BigTopBlaster => "Big Top Blaster",
+            ShipType::MobyDick => "Moby Dick",
+            ShipType::QueenMama => "Queen Mama",
         }
     }
 }
 
 #[derive(SpacetimeType, Clone, Copy, Debug, PartialEq)]
-pub enum ShipUpgradeType {
-    // Stat boosts
-    BonusGold,          // +1 gold per round
-    BonusHealth,        // +10 HP to all units
-    BonusAttack,        // +2 attack to all units
-    BonusDefense,       // +2 defense to all units
-    BonusSpeed,         // +10% attack speed to all units
-
-    // Trait-specific boosts
-    StrawHatBuff,       // StrawHat units get +20% stats
-    MarineBuff,         // Marine units get +20% stats
-    RevolutionaryBuff,  // Revolutionary units get +20% stats
-    LogiaBuff,          // Logia units gain shield
-    ParameciaBuff,      // Paramecia units gain lifesteal
-    ZoanBuff,           // Zoan units gain +50 HP
-
-    // Special effects
-    GamblerLuck,        // Rerolls cost 1 gold
-    FastLearner,        // Units gain +50% XP
-    Plunderer,          // Win streak gives extra gold
-    Medic,              // Units heal 5 HP per second
-    Arsenal,            // Units start with +1 item slot
-}
-
-#[derive(SpacetimeType, Clone, Copy, Debug, PartialEq)]
 pub enum CrewRarity {
-    Common,      // Bronze
-    Rare,        // Silver
-    Epic,        // Gold
-    Legendary,   // Rainbow
+    Common,      // Green 1 Gold
+    Uncommon,    // Blue 2 Gold
+    Rare,        // Yellow 3 Gold
+    Epic,        // Purple 4 Gold
+    Legendary,   // Gold 5 Gold
 }
 
 #[derive(SpacetimeType, Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum CrewTrait {
     StrawHat,
-    Marine,
     Revolutionary,
     RedHairPirates,
     Giants,
     HolyKnights,
-    FiveElders,
+    Gorosei,
+    BlackbearedPirates,
+    WhitebearedPirates,
+    BigMomPirates,
+    HeartPirates,
+    CrossGuildPirates,
+
     Logia,
     Paramecia,
     Zoan,
-    Sword,
-    DFUser, // Devil Fruit User
+    Swordsman,
+    Brawler,
+    Sniper,
+    Emperor,
+}
+impl CrewTrait {
+    pub fn ship_trait(self) -> Option<ShipType> {
+        match self {
+            CrewTrait::StrawHat => Some(ShipType::ThousandSunny),
+            CrewTrait::RedHairPirates => Some(ShipType::RedForce),
+            CrewTrait::Giants => Some(ShipType::Naglfar),
+            CrewTrait::BlackbearedPirates => Some(ShipType::SaberOfXebec),
+            CrewTrait::HeartPirates => Some(ShipType::PolarTang),
+            CrewTrait::WhitebearedPirates => Some(ShipType::MobyDick),
+            CrewTrait::BigMomPirates => Some(ShipType::QueenMama),
+            CrewTrait::CrossGuildPirates => Some(ShipType::BigTopBlaster),
+
+            // Non-ship traits
+            CrewTrait::Swordsman
+            | CrewTrait::Brawler
+            | CrewTrait::Logia
+            | CrewTrait::Paramecia
+            | CrewTrait::Zoan
+            | CrewTrait::Revolutionary
+            | CrewTrait::HolyKnights
+            | CrewTrait::Gorosei
+            | CrewTrait::Sniper
+            | CrewTrait::Emperor => None,
+        }
+    }
+
+    pub fn is_ship_defining(self) -> bool {
+        self.ship_trait().is_some()
+    }
 }
 
 #[derive(SpacetimeType, Clone, Copy, Debug, PartialEq)]
@@ -219,45 +174,118 @@ pub enum BattleStatus {
     InProgress,
     Finished,
 }
-
 #[derive(SpacetimeType, Clone, Copy, Debug, PartialEq)]
 pub enum ItemComponent {
-    Cutlass,           // +AD
-    SniperGoggles,     // +Crit Chance
-    ShellDial,         // +AS (Attack Speed)
-    ToneDial,          // +AP (Ability Power)
-    SeastoneFragment,  // +Armor
-    TidalCloak,        // +MR (Magic Resist)
-    EnergyDrink,       // +Starting Mana
-    Meat,              // +HP
+    Sword,      // +4 AD
+    Ring,       // +5 AP
+    Gloves,     // +10% Attack Speed
 }
 
 #[derive(SpacetimeType, Clone, Copy, Debug, PartialEq)]
 pub enum CompletedItem {
-    // Damage / AD Focus
-    Yoru,              // Cutlass + SniperGoggles → +75% crit damage
-    Kabuto,            // Cutlass + ShellDial → Attacks deal splash
-    Shusui,            // Cutlass + SeastoneFragment → Bonus AD + armor shred
+    // Sword + Sword → Yooru
+    // +15 AD
+    // Effect: Every 3rd attack deals 50 damage to ALL enemies
+    Yooru,
 
-    // AP Focus
-    ClimaTact,         // ToneDial + ToneDial → Doubles AP
-    ThunderTempo,      // ToneDial + ShellDial → AP + attack speed
-    MirageFlower,      // ToneDial + EnergyDrink → AP + starting mana
+    // Gloves + Gloves → Kabuto
+    // +30% Attack Speed, +5 AP
+    // Effect: 25% chance to fire 3 rapid shots (ranged units only)
+    Kabuto,
 
-    // Tank Focus
-    AdamWood,          // SeastoneFragment + SeastoneFragment → Massive armor
-    SeaKingScale,      // SeastoneFragment + TidalCloak → Armor + MR
-    ThousandSunnyHull, // SeastoneFragment + Meat → Armor + HP
+    // Gloves + Sword → Shusui
+    // +10 AD, +15% Attack Speed
+    // Effect: Every 4th attack deals 200% damage
+    Shusui,
 
-    // Utility Focus
-    VivrCard,          // EnergyDrink + TidalCloak → Mana + survivability
-    LogPose,           // SniperGoggles + EnergyDrink → Crit + mana
-    Poneglyph,         // ToneDial + SeastoneFragment → AP + armor
+    // Ring + Ring → RingRing
+    // +13 AP
+    // Effect: Begin battle: Launch 10 damage fireball at random enemy
+    RingRing,
 
-    // Hybrid
-    GumGumFruit,       // Cutlass + Meat → AD + HP
-    GomuGomuNoMi,      // Meat + Meat → Massive HP regeneration
-    HakiMastery,       // ToneDial + Cutlass → AD + AP hybrid
+    // Ring + Sword → 10T Hammer
+    // +10 AD, +10 AP
+    // Effect: 10% chance to stun target for 1.5 seconds
+    TenTonHammer,
+
+    // Ring + Gloves → Impact Dial
+    // +10 AP, +15% Attack Speed
+    // Effect: Begin battle: Deal 15 damage to nearest enemy
+    ImpactDial,
+}
+
+// Item enum - can be either component or completed
+#[derive(SpacetimeType, Clone, Copy, Debug, PartialEq)]
+pub enum Item {
+    Component(ItemComponent),
+    Completed(CompletedItem),
+}
+
+impl Item {
+    pub fn is_component(&self) -> bool {
+        matches!(self, Item::Component(_))
+    }
+
+    pub fn get_name(&self) -> &'static str {
+        match self {
+            Item::Component(ItemComponent::Sword) => "Sword",
+            Item::Component(ItemComponent::Ring) => "Ring",
+            Item::Component(ItemComponent::Gloves) => "Gloves",
+            Item::Completed(CompletedItem::Yooru) => "Yooru",
+            Item::Completed(CompletedItem::Kabuto) => "Kabuto",
+            Item::Completed(CompletedItem::Shusui) => "Shusui",
+            Item::Completed(CompletedItem::RingRing) => "RingRing",
+            Item::Completed(CompletedItem::TenTonHammer) => "10T Hammer",
+            Item::Completed(CompletedItem::ImpactDial) => "Impact Dial",
+        }
+    }
+
+    pub fn get_description(&self) -> &'static str {
+        match self {
+            Item::Component(ItemComponent::Sword) => "+4 AD",
+            Item::Component(ItemComponent::Ring) => "+5 AP",
+            Item::Component(ItemComponent::Gloves) => "+10% ATK Speed",
+            Item::Completed(CompletedItem::Yooru) =>
+                "+15 AD\nMihawk's legendary black blade.\nEvery 3rd attack: Deal 50 damage to ALL enemies.",
+            Item::Completed(CompletedItem::Kabuto) =>
+                "+30% ATK Speed, +5 AP\nUsopp's enhanced slingshot.\n25% chance to fire 3 rapid shots.",
+            Item::Completed(CompletedItem::Shusui) =>
+                "+10 AD, +15% ATK Speed\nZoro's legendary cursed sword.\nEvery 4th attack: Deal 200% damage.",
+            Item::Completed(CompletedItem::RingRing) =>
+                "+13 AP\nBegin: Launch a 10 dmg fireball at a random enemy.",
+            Item::Completed(CompletedItem::TenTonHammer) =>
+                "+10 AD, +10 AP\nA devastating 10 ton hammer.\n10% chance to stun target for 1.5s.",
+            Item::Completed(CompletedItem::ImpactDial) =>
+                "+10 AP, +15% ATK Speed\nBegin: Deal 15 damage to nearest enemy.",
+        }
+    }
+}
+
+#[derive(SpacetimeType, Clone, Copy, PartialEq)]
+pub enum LocationType {
+    Start,
+    End,
+    PVECombat,
+    PVPCombat,
+    TreasureIsland,
+}
+
+#[derive(SpacetimeType, Clone, Copy, PartialEq)]
+pub enum EnemyType {
+    MarineSwordsman,
+    MarineRifle,
+    Parcifista,
+    Smoker,
+    Korby,
+    Garp,
+    Kizaru
+}
+
+#[derive(SpacetimeType, Clone)]
+pub struct EnemySpawn {
+    pub enemy_id: u64,      // Reference to Enemy table
+    pub position_x: u32,
+    pub position_y: u32,
 }
 
 // ========== BATTLE CONSTANTS ==========
@@ -271,22 +299,3 @@ pub const GRID_CELL_SIZE: u16 = 200;
 pub const GRID_WIDTH: u16 = 8; // 1600 / 200 = 8
 pub const GRID_HEIGHT: u16 = 8;
 pub const NUM_GRID_CELLS: u16 = GRID_WIDTH * GRID_HEIGHT; // 64 cells
-
-// ========== TREASURE ISLAND CONSTANTS ==========
-
-pub const TREASURE_ISLAND_ROUNDS: [u32; 3] = [5, 15, 25]; // Rounds when treasure islands appear
-
-#[derive(SpacetimeType, Clone, Copy, Debug, PartialEq)]
-pub enum TreasureRewardType {
-    Gold(u32),           // Berries
-    Item(ItemComponent), // Random item component
-    Reroll,              // Free shop reroll
-    Experience,          // Bonus XP for units (future)
-}
-
-#[derive(SpacetimeType, Clone, Copy, Debug, PartialEq)]
-pub enum TreasureIslandType {
-    SmallIsland,   // 1 reward (rounds 5)
-    MediumIsland,  // 2 rewards (rounds 15)
-    LargeIsland,   // 3 rewards (rounds 25)
-}

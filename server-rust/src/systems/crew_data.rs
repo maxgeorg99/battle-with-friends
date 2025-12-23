@@ -1,6 +1,28 @@
 use spacetimedb::{ReducerContext, Table, log};
+use CrewRarity::*;
+use CrewTrait::*;
 use crate::types::*;
 use crate::tables::{CrewTemplate, crew_template};
+
+/// Helper macro to create crew templates with less boilerplate
+/// Default values: ability_power=10, attack_speed=1.0, magic_resistance=5
+macro_rules! crew {
+    ($name:expr, $rarity:expr, [$($trait:expr),*], $hp:expr, $atk:expr, $def:expr, $cost:expr) => {
+        CrewTemplate {
+            id: 0,
+            name: $name.to_string(),
+            rarity: $rarity,
+            traits: vec![$($trait),*],
+            max_hp: $hp,
+            ability_power: 10,      // Default AP
+            attack: $atk,
+            attack_speed: 1.0,      // Default attack speed
+            defense: $def,
+            magic_resistance: 5,    // Default MR
+            cost: $cost,
+        }
+    };
+}
 
 /// Initialize the crew template database - called once on server initialization
 pub fn init_crew_templates(ctx: &ReducerContext) {
@@ -12,64 +34,87 @@ pub fn init_crew_templates(ctx: &ReducerContext) {
 
     log::info!("Initializing crew template database...");
 
-    // Crew templates - using struct directly with auto-incremented IDs
     let crew_templates = vec![
         // Straw Hats
-        CrewTemplate { id: 0, name: "Roronoa Zoro".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::StrawHat, trait2: Some(CrewTrait::Sword), max_hp: 80, attack: 20, defense: 8, cost: 300000 },
-        CrewTemplate { id: 0, name: "Nami".to_string(), rarity: CrewRarity::Common, trait1: CrewTrait::StrawHat, trait2: None, max_hp: 50, attack: 12, defense: 6, cost: 200000 },
-        CrewTemplate { id: 0, name: "Usopp".to_string(), rarity: CrewRarity::Common, trait1: CrewTrait::StrawHat, trait2: None, max_hp: 60, attack: 15, defense: 5, cost: 200000 },
-        CrewTemplate { id: 0, name: "Sanji".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::StrawHat, trait2: None, max_hp: 75, attack: 18, defense: 10, cost: 300000 },
-        CrewTemplate { id: 0, name: "Tony Tony Chopper".to_string(), rarity: CrewRarity::Common, trait1: CrewTrait::StrawHat, trait2: Some(CrewTrait::Zoan), max_hp: 55, attack: 14, defense: 7, cost: 200000 },
-        CrewTemplate { id: 0, name: "Nico Robin".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::StrawHat, trait2: Some(CrewTrait::Paramecia), max_hp: 70, attack: 16, defense: 9, cost: 300000 },
-        CrewTemplate { id: 0, name: "Franky".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::StrawHat, trait2: None, max_hp: 78, attack: 19, defense: 6, cost: 300000 },
-        CrewTemplate { id: 0, name: "Brook".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::StrawHat, trait2: Some(CrewTrait::Paramecia), max_hp: 72, attack: 17, defense: 8, cost: 300000 },
-        CrewTemplate { id: 0, name: "Jinbe".to_string(), rarity: CrewRarity::Epic, trait1: CrewTrait::StrawHat, trait2: None, max_hp: 85, attack: 22, defense: 12, cost: 500000 },
-
-        // Marines
-        CrewTemplate { id: 0, name: "Monkey D. Garp".to_string(), rarity: CrewRarity::Legendary, trait1: CrewTrait::Marine, trait2: None, max_hp: 95, attack: 25, defense: 15, cost: 800000 },
-        CrewTemplate { id: 0, name: "Sengoku".to_string(), rarity: CrewRarity::Legendary, trait1: CrewTrait::Marine, trait2: Some(CrewTrait::Zoan), max_hp: 92, attack: 24, defense: 14, cost: 800000 },
-        CrewTemplate { id: 0, name: "Akainu".to_string(), rarity: CrewRarity::Legendary, trait1: CrewTrait::Marine, trait2: Some(CrewTrait::Logia), max_hp: 98, attack: 26, defense: 16, cost: 1000000 },
-        CrewTemplate { id: 0, name: "Kizaru".to_string(), rarity: CrewRarity::Legendary, trait1: CrewTrait::Marine, trait2: Some(CrewTrait::Logia), max_hp: 94, attack: 25, defense: 14, cost: 900000 },
-        CrewTemplate { id: 0, name: "Fujitora".to_string(), rarity: CrewRarity::Epic, trait1: CrewTrait::Marine, trait2: Some(CrewTrait::Paramecia), max_hp: 88, attack: 23, defense: 13, cost: 600000 },
-        CrewTemplate { id: 0, name: "Smoker".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::Marine, trait2: Some(CrewTrait::Logia), max_hp: 76, attack: 19, defense: 9, cost: 350000 },
-        CrewTemplate { id: 0, name: "Tashigi".to_string(), rarity: CrewRarity::Common, trait1: CrewTrait::Marine, trait2: Some(CrewTrait::Sword), max_hp: 58, attack: 14, defense: 6, cost: 200000 },
-        CrewTemplate { id: 0, name: "Koby".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::Marine, trait2: None, max_hp: 68, attack: 16, defense: 8, cost: 280000 },
-
-        // Revolutionary Army
-        CrewTemplate { id: 0, name: "Monkey D. Dragon".to_string(), rarity: CrewRarity::Legendary, trait1: CrewTrait::Revolutionary, trait2: None, max_hp: 100, attack: 28, defense: 18, cost: 1200000 },
-        CrewTemplate { id: 0, name: "Sabo".to_string(), rarity: CrewRarity::Epic, trait1: CrewTrait::Revolutionary, trait2: Some(CrewTrait::Logia), max_hp: 89, attack: 23, defense: 13, cost: 650000 },
-        CrewTemplate { id: 0, name: "Emporio Ivankov".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::Revolutionary, trait2: Some(CrewTrait::Paramecia), max_hp: 74, attack: 18, defense: 10, cost: 320000 },
-        CrewTemplate { id: 0, name: "Bartholomew Kuma".to_string(), rarity: CrewRarity::Epic, trait1: CrewTrait::Revolutionary, trait2: Some(CrewTrait::Paramecia), max_hp: 87, attack: 22, defense: 12, cost: 600000 },
-        CrewTemplate { id: 0, name: "Inazuma".to_string(), rarity: CrewRarity::Common, trait1: CrewTrait::Revolutionary, trait2: Some(CrewTrait::Paramecia), max_hp: 62, attack: 15, defense: 7, cost: 220000 },
+        crew!("Brook", Uncommon, [StrawHat, Swordsman], 25, 2, 5, 100000),
+        crew!("Franky", Rare, [StrawHat, Brawler], 45, 3, 8, 300000),
+        crew!("Jimbei", Rare, [StrawHat, Brawler], 60, 3, 8, 400000),
+        crew!("Luffy", Legendary, [StrawHat, Emperor, Zoan], 40, 2, 12, 500000),
+        crew!("Nami", Uncommon, [StrawHat], 20, 1, 5, 100000),
+        crew!("Sanji", Rare, [StrawHat], 35, 3, 8, 300000),
+        crew!("Zoro", Rare, [StrawHat, Swordsman], 50, 4, 8, 400000),
 
         // Red Hair Pirates
-        CrewTemplate { id: 0, name: "Shanks".to_string(), rarity: CrewRarity::Legendary, trait1: CrewTrait::RedHairPirates, trait2: None, max_hp: 99, attack: 27, defense: 17, cost: 1100000 },
-        CrewTemplate { id: 0, name: "Ben Beckman".to_string(), rarity: CrewRarity::Epic, trait1: CrewTrait::RedHairPirates, trait2: None, max_hp: 90, attack: 24, defense: 14, cost: 700000 },
-        CrewTemplate { id: 0, name: "Yasopp".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::RedHairPirates, trait2: None, max_hp: 77, attack: 20, defense: 9, cost: 350000 },
-        CrewTemplate { id: 0, name: "Lucky Roux".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::RedHairPirates, trait2: None, max_hp: 75, attack: 19, defense: 11, cost: 340000 },
+        crew!("Beckman", Rare, [RedHairPirates, Sniper], 40, 5, 8, 400000),
+        crew!("Lucky Roux", Rare, [RedHairPirates, Brawler], 50, 4, 8, 300000),
+        crew!("Shanks", Uncommon, [RedHairPirates, Swordsman], 20, 3, 5, 200000),
+        crew!("Yasopp", Rare, [RedHairPirates, Sniper], 35, 4, 8, 300000),
+
+        // Whitebeard Pirates
+        crew!("Ace", Legendary, [WhitebearedPirates, Logia], 55, 5, 12, 500000),
+        crew!("Edward Newgate", Common, [WhitebearedPirates, Emperor], 100, 8, 10, 600000),
+        crew!("Jozu", Rare, [WhitebearedPirates, Paramecia], 70, 4, 8, 400000),
+        crew!("Marco", Legendary, [WhitebearedPirates, Zoan], 65, 4, 12, 500000),
+        crew!("Vista", Rare, [WhitebearedPirates, Swordsman], 50, 5, 8, 400000),
+
+        // Blackbeard Pirates
+        crew!("Blackbeard", Legendary, [BlackbearedPirates, Logia, Paramecia], 60, 5, 12, 500000),
+        crew!("Burgess", Uncommon, [BlackbearedPirates, Brawler], 35, 2, 5, 100000),
+        crew!("Devon", Rare, [BlackbearedPirates, Zoan], 40, 3, 8, 400000),
+        crew!("DocQ", Rare, [BlackbearedPirates, Paramecia], 30, 2, 8, 300000),
+        crew!("Kuzan", Legendary, [BlackbearedPirates, Logia], 55, 4, 12, 500000),
+        crew!("Laffitte", Rare, [BlackbearedPirates], 35, 3, 8, 300000),
+        crew!("Pizarro", Rare, [BlackbearedPirates], 50, 3, 8, 400000),
+        crew!("Shiryu", Rare, [BlackbearedPirates, Swordsman], 50, 4, 8, 400000),
+        crew!("Shot", Rare, [BlackbearedPirates], 40, 3, 8, 300000),
+        crew!("VanAugur", Rare, [BlackbearedPirates, Sniper], 30, 3, 8, 400000),
+        crew!("Wolf", Rare, [BlackbearedPirates, Giants], 75, 4, 9, 400000),
+
+        // Big Mom Pirates
+        crew!("Charlotte Linlin", Common, [BigMomPirates, Emperor], 110, 9, 11, 600000),
+        crew!("Cracker", Rare, [BigMomPirates, Swordsman, Paramecia], 45, 5, 8, 400000),
+        crew!("Katakuri", Common, [BigMomPirates, Paramecia], 80, 7, 8, 600000),
+        crew!("Perospero", Rare, [BigMomPirates, Paramecia], 45, 4, 8, 400000),
+        crew!("Smoothie", Legendary, [BigMomPirates, Swordsman], 55, 5, 12, 500000),
+
+        // Heart Pirates
+        crew!("Bepo", Uncommon, [HeartPirates, Brawler], 30, 2, 5, 100000),
+        crew!("Jean Bart", Rare, [HeartPirates, Swordsman], 40, 3, 8, 200000),
+        crew!("Law", Legendary, [HeartPirates, Swordsman, Paramecia], 60, 5, 12, 500000),
+        crew!("Penguin", Uncommon, [HeartPirates], 25, 2, 5, 100000),
+
+        // Cross Guild
+        crew!("Buggy", Uncommon, [CrossGuildPirates, Paramecia], 30, 2, 5, 100000),
+        crew!("Crocodile", Rare, [CrossGuildPirates, Logia], 45, 5, 8, 400000),
+        crew!("Mihawk", Legendary, [CrossGuildPirates, Swordsman], 60, 6, 12, 500000),
+
+        // Revolutionary Army
+        crew!("Dragon", Legendary, [Revolutionary], 55, 4, 12, 500000),
+        crew!("Sabo", Rare, [Revolutionary, Logia], 45, 3, 8, 400000),
+        crew!("Emporio Ivankov", Common, [Revolutionary, Brawler], 74, 12, 10, 100000),
+        crew!("Bartholomew Kuma", Rare, [Revolutionary, Paramecia, Brawler], 80, 22, 18, 300000),
 
         // Giants
-        CrewTemplate { id: 0, name: "Dorry".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::Giants, trait2: None, max_hp: 82, attack: 21, defense: 8, cost: 380000 },
-        CrewTemplate { id: 0, name: "Brogy".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::Giants, trait2: None, max_hp: 82, attack: 21, defense: 8, cost: 380000 },
-        CrewTemplate { id: 0, name: "Oimo".to_string(), rarity: CrewRarity::Common, trait1: CrewTrait::Giants, trait2: None, max_hp: 65, attack: 16, defense: 6, cost: 240000 },
-        CrewTemplate { id: 0, name: "Kashii".to_string(), rarity: CrewRarity::Common, trait1: CrewTrait::Giants, trait2: None, max_hp: 65, attack: 16, defense: 6, cost: 240000 },
-        CrewTemplate { id: 0, name: "Hajrudin".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::Giants, trait2: None, max_hp: 79, attack: 20, defense: 9, cost: 360000 },
-        CrewTemplate { id: 0, name: "Loki".to_string(), rarity: CrewRarity::Epic, trait1: CrewTrait::Giants, trait2: Some(CrewTrait::Zoan), max_hp: 79, attack: 20, defense: 9, cost: 360000 },
+        crew!("Brogy", Rare, [Giants, Brawler], 38, 3, 8, 300000),
+        crew!("Dorry", Rare, [Giants, Swordsman], 35, 4, 8, 300000),
+        crew!("Harald", Legendary, [Giants], 80, 5, 13, 500000),
+        crew!("Loki", Rare, [Giants], 70, 4, 8, 400000),
+        crew!("Hajrudin", Uncommon, [Giants], 30, 4, 8, 100000),
 
-        // Five Elders
-        CrewTemplate { id: 0, name: "St. Jaygarcia Saturn".to_string(), rarity: CrewRarity::Legendary, trait1: CrewTrait::FiveElders, trait2: Some(CrewTrait::Zoan), max_hp: 97, attack: 27, defense: 16, cost: 1050000 },
-        CrewTemplate { id: 0, name: "St. Marcus Mars".to_string(), rarity: CrewRarity::Legendary, trait1: CrewTrait::FiveElders, trait2: Some(CrewTrait::Zoan), max_hp: 97, attack: 27, defense: 16, cost: 1050000 },
-        CrewTemplate { id: 0, name: "St. Topman Warcury".to_string(), rarity: CrewRarity::Legendary, trait1: CrewTrait::FiveElders, trait2: Some(CrewTrait::Zoan), max_hp: 98, attack: 28, defense: 17, cost: 1100000 },
-        CrewTemplate { id: 0, name: "St. Ethanbaron V. Nusjuro".to_string(), rarity: CrewRarity::Legendary, trait1: CrewTrait::FiveElders, trait2: Some(CrewTrait::Zoan), max_hp: 97, attack: 27, defense: 16, cost: 1050000 },
-        CrewTemplate { id: 0, name: "St. Shepherd Ju Peter".to_string(), rarity: CrewRarity::Legendary, trait1: CrewTrait::FiveElders, trait2: Some(CrewTrait::Zoan), max_hp: 97, attack: 27, defense: 16, cost: 1050000 },
+        // Gorosei (Five Elders)
+        crew!("JuPeter", Legendary, [Gorosei, Zoan], 75, 6, 12, 500000),
+        crew!("Mars", Legendary, [Gorosei, Zoan], 65, 7, 12, 500000),
+        crew!("Nusjuro", Legendary, [Gorosei, Zoan, Swordsman], 60, 9, 12, 500000),
+        crew!("Saturn", Legendary, [Gorosei, Zoan], 70, 6, 12, 500000),
+        crew!("Warcury", Legendary, [Gorosei, Zoan], 80, 8, 13, 500000),
 
         // Holy Knights
-        CrewTemplate { id: 0, name: "Figarland Garling".to_string(), rarity: CrewRarity::Legendary, trait1: CrewTrait::HolyKnights, trait2: None, max_hp: 96, attack: 26, defense: 15, cost: 950000 },
-        CrewTemplate { id: 0, name: "Figarland Shamrock".to_string(), rarity: CrewRarity::Epic, trait1: CrewTrait::HolyKnights, trait2: None, max_hp: 86, attack: 22, defense: 12, cost: 580000 },
-        CrewTemplate { id: 0, name: "Hanmayer Gunko".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::HolyKnights, trait2: None, max_hp: 73, attack: 18, defense: 10, cost: 330000 },
-        CrewTemplate { id: 0, name: "Shepherd Sommers".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::HolyKnights, trait2: None, max_hp: 75, attack: 19, defense: 9, cost: 340000 },
-        CrewTemplate { id: 0, name: "Rimoshifu Kiilingham".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::HolyKnights, trait2: None, max_hp: 71, attack: 17, defense: 9, cost: 310000 },
-        CrewTemplate { id: 0, name: "Satcheis Maffey".to_string(), rarity: CrewRarity::Rare, trait1: CrewTrait::HolyKnights, trait2: None, max_hp: 69, attack: 16, defense: 11, cost: 300000 },
+        crew!("Figarland Garling", Legendary, [HolyKnights], 96, 26, 15, 50000),
+        crew!("Figarland Shamrock", Epic, [HolyKnights], 86, 22, 12, 50000),
+        crew!("Hanmayer Gunko", Rare, [HolyKnights], 73, 18, 10, 300000),
+        crew!("Shepherd Sommers", Rare, [HolyKnights], 75, 19, 9, 300000),
+        crew!("Rimoshifu Kiilingham", Rare, [HolyKnights], 71, 17, 9, 300000),
+        crew!("Satcheis Maffey", Rare, [HolyKnights], 69, 16, 11, 300000),
     ];
 
     // Insert all crew templates into the database
